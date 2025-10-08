@@ -13,7 +13,8 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , FileDialogEvent(..)
   , goBack
   , goFwd
-
+  , goUp
+  , defFileModel
   ) where
 
 import Monomer.Widgets.Extra.FileDialog.OS
@@ -56,6 +57,9 @@ data FileDialogModel = FileDialogModel
 
 makeLenses 'FileDialogModel
 
+defFileModel :: FileDialogModel
+defFileModel = def
+
 instance Default FileDialogModel where
   def = FileDialogModel
     { _currentDir = baseDir
@@ -76,10 +80,15 @@ data FileDialogEvent
   | ChangeDir OsPath -- Set the dir and populate the file list (but don't change back/fwd).
   | ChangeToDir OsPath -- Set the dir, populate the file list, modify the back/fwd lists.
   | Refresh -- Populate the dir with the "current" directory.
+  | SetFiles [FileData]
   | FileSelect
   | SetupDialog -- set the current dir to the pwd
   | NullEvent   -- Do Nothing
   deriving (Show, Eq)
+
+-- | To be used whenever changing to a new directory.
+-- refresh :: FileDialogModel -> IO FileDialogEvent
+-- refresh model = SetFiles <$> 
 
 goBack :: FileDialogModel -> (FileDialogModel, FileDialogEvent)
 goBack model
@@ -130,4 +139,30 @@ goFwd model
   where 
     mx  = _maxBacklog model
     pwd = _currentDir model
+
+goUp :: FileDialogModel -> (FileDialogModel, FileDialogEvent)
+goUp model
+  | (oldDir == newDir) = (model, NullEvent)
+  | (Seq.length (_backButton model) >= mx)
+  , (_ :<| bckRst) <- (_backButton model)
+  = ( model
+       & currentDir .~ newDir
+       & fwdButton  .~ Empty
+       & backButton .~ (bckRst |> oldDir)
+    , Refresh
+    )
+  | bckRst <- (_backButton model)
+  = ( model
+       & currentDir .~ newDir
+       & fwdButton  .~ Empty
+       & backButton .~ (bckRst |> oldDir)
+    , Refresh
+    )
+  | otherwise = (model, NullEvent)
+  where 
+    oldDir = (_currentDir model)
+    newDir = takeDirectory oldDir
+    mx  = _maxBacklog model
+
+
 

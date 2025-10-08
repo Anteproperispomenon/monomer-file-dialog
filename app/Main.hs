@@ -11,13 +11,17 @@ import TextShow
 
 import qualified Monomer.Lens as L
 
-newtype AppModel = AppModel {
-  _clickCount :: Int
-} deriving (Eq, Show)
+import Monomer.Widgets.Extra.FileDialog
+
+data AppModel = AppModel 
+  { _clickCount :: Int
+  , _fileModel  :: FileDialogModel
+  } deriving (Eq, Show)
 
 data AppEvent
   = AppInit
   | AppIncrease
+  | AppNull
   deriving (Eq, Show)
 
 makeLenses 'AppModel
@@ -27,14 +31,15 @@ buildUI
   -> AppModel
   -> WidgetNode AppModel AppEvent
 buildUI wenv model = widgetTree where
-  widgetTree = vstack [
-      label "Hello world",
-      spacer,
-      hstack [
-        label $ "Click count: " <> showt (model ^. clickCount),
-        spacer,
-        button "Increase count" AppIncrease
-      ]
+  widgetTree = vstack 
+    [ label "Hello world"
+    , spacer
+    , hstack 
+       [ label $ "Click count: " <> showt (model ^. clickCount)
+       , spacer
+       , button "Increase count" AppIncrease
+       ]
+    , fileDialog (\_ -> AppNull) fileModel
     ] `styleBasic` [padding 10]
 
 handleEvent
@@ -46,6 +51,7 @@ handleEvent
 handleEvent wenv node model evt = case evt of
   AppInit -> []
   AppIncrease -> [Model (model & clickCount +~ 1)]
+  _ -> []
 
 main :: IO ()
 main = do
@@ -58,4 +64,4 @@ main = do
       appFontDef "Regular" "./assets/fonts/Roboto-Regular.ttf",
       appInitEvent AppInit
       ]
-    model = AppModel 0
+    model = AppModel 0 defFileModel

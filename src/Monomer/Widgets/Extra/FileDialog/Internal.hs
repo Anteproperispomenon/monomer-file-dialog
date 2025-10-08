@@ -4,6 +4,8 @@ module Monomer.Widgets.Extra.FileDialog.Internal
   ( FileData(..)
   , PathKind(..)
   , getDirData
+  , getDirData'
+  , showSize
   ) where
 
 import System.Directory.OsPath
@@ -50,6 +52,11 @@ getDirData pth = do
     getExtnMaybe pt
       | (hasExtension pt) = Nothing
       | otherwise         = Just (takeExtensions pt)
+
+getDirData' :: OsPath -> IO [FileData]
+getDirData' pth = do
+  (dirs, files) <- getDirData pth
+  return (dirs ++ files)
 
 getFileSize' :: OsPath -> IO (Maybe Integer)
 getFileSize' osPath = Just <$> getFileSize osPath
