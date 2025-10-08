@@ -18,7 +18,6 @@ extra-source-files:
 
 library
   exposed-modules:
-      Main
       Monomer.Widgets.Extra.FileDialog
       Monomer.Widgets.Extra.FileDialog.Internal
       Monomer.Widgets.Extra.FileDialog.Model
@@ -47,6 +46,38 @@ library
     , filepath
     , lens
     , monomer
+    , text
+    , text-show
+  default-language: Haskell2010
+
+executable app
+  main-is: Main.hs
+  other-modules:
+      Paths_monomer_file_dialog
+  hs-source-dirs:
+      app
+  default-extensions:
+      FlexibleContexts
+      FlexibleInstances
+      ImportQualifiedPost
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      OverloadedStrings
+      PatternSynonyms
+      ScopedTypeVariables
+      TupleSections
+      TypeApplications
+  ghc-options: -fwarn-incomplete-patterns -threaded
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , data-default
+    , directory
+    , filepath
+    , lens
+    , monomer
+    , monomer-file-dialog
     , text
     , text-show
   default-language: Haskell2010

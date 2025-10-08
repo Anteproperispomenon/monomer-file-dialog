@@ -41,3 +41,12 @@ library:
   - -fwarn-incomplete-patterns
   - -threaded
 
+executables:
+  app:
+    source-dirs:      app
+    main:             Main.hs
+    dependencies:
+      - monomer-file-dialog
+    ghc-options:
+    - -fwarn-incomplete-patterns
+    - -threaded
