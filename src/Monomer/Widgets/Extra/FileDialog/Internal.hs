@@ -9,6 +9,7 @@ module Monomer.Widgets.Extra.FileDialog.Internal
   , getExtn
   , getFileSizeT
   , getFileTime
+  , showFilePath
   ) where
 
 import System.Directory.OsPath
@@ -37,9 +38,12 @@ data FileData = FileData
   } deriving (Show, Eq)
 
 data PathKind
-  = PathFile
-  | PathDir
-  deriving (Show, Eq)
+  = PathDir
+  | PathFile
+  deriving (Show, Eq, Ord)
+
+-- deriving Ord so that directories are sorted
+-- before files.
 
 -- | Get all directories and files in a given 
 --   directory. 
@@ -87,9 +91,11 @@ showSize n
     fltNum = showbFFloat (Just 2) (nFlo / (1024 ^^ newM))
 
 getExtn :: FileData -> T.Text
-getExtn fd = case (fdExtn fd) of
-  Nothing -> "Directory"
-  (Just ext) -> (T.pack $ show ext) <> " file"
+getExtn fd = case (fdKind fd) of
+    PathDir  -> "Directory"
+    PathFile -> case (fdExtn fd) of
+      Nothing -> "File"
+      (Just ext) -> (T.pack $ show ext) <> " file"
 
 getFileSizeT :: FileData -> T.Text
 getFileSizeT fd = case (fdSize fd) of
@@ -105,3 +111,10 @@ theTimeFormat = defaultTimeLocale
   , timeFmt = "%H:%M" -- or %H:%M:%S
   , dateTimeFmt = "%Y-%m-%d, %H:%M"
   }
+
+showFilePath :: OsPath -> T.Text
+showFilePath osPath = case (decodeUtf osPath) of
+  (Left _)    -> "<error>"
+  (Right str) -> T.pack str
+
+-- decodeUtf 

@@ -81,7 +81,7 @@ buildUI wenv model = vstack_ [childSpacing_ 3]
      -- , textField_ currentDir [readOnly]
      , label (T.pack $ show (model ^. currentDir))
      ]
-  , hagrid [nameColumn, extnColumn, sizeColumn] (model ^. dirFiles)
+  , hagrid [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles)
   {-
   , scroll $ vstack_ [childSpacing_ 1] $ (model ^. dirFiles) <&> \fd -> hstack_ [childSpacing_ 8]
       [ label (T.pack $ show (fdName fd))

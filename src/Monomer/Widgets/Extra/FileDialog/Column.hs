@@ -4,7 +4,7 @@ module Monomer.Widgets.Extra.FileDialog.Column
   ( sizeColumn
   , extnColumn
   , nameColumn
-
+  , dateColumn
   ) where
 
 import Monomer.Hagrid
@@ -18,14 +18,104 @@ import Data.Text qualified as T
 -- Needs to be changed so that it sorts on
 -- 
 sizeColumn :: Column FileDialogEvent FileData
-sizeColumn = textColumn "Size" getFileSizeT 
+-- sizeColumn = textColumn "Size" getFileSizeT 
+sizeColumn = Column
+  { name = "Size"
+  , widget = LabelWidget (const getFileSizeT)
+  , footerWidget = NoFooterWidget
+  , align = ColumnAlignRight
+  , initialWidth = 120
+  , sortKey = SortWith fdSize -- since it's already a Maybe type
+  , minWidth = 80
+  , paddingW = 10
+  , paddingH = 10
+  , resizeHandler = Nothing
+  , sortHandler = Nothing
+  }
 
 extnColumn :: Column FileDialogEvent FileData
-extnColumn = textColumn "File Type" getExtn
+-- extnColumn = textColumn "File Type" getExtn
+extnColumn = Column
+  { name = "File Type"
+  , widget = LabelWidget (const getExtn)
+  , footerWidget = NoFooterWidget
+  , align = ColumnAlignLeft
+  , initialWidth = 120
+  , sortKey = SortWith (getOrd fdExtn) -- since it's already a Maybe type
+  , minWidth = 80
+  , paddingW = 10
+  , paddingH = 10
+  , resizeHandler = Nothing
+  , sortHandler = Nothing
+  }
+
 
 nameColumn :: Column FileDialogEvent FileData
-nameColumn = showOrdColumn "File Name" (fdName)
+-- nameColumn = showOrdColumn "File Name" (fdName)
+nameColumn = Column
+  { name = "File Name"
+  , widget = LabelWidget (const (showFilePath . fdName))
+  , footerWidget = NoFooterWidget
+  , align = ColumnAlignLeft
+  , initialWidth = 320
+  , sortKey = SortWith (getOrd fdName)
+  , minWidth = 120
+  , paddingW = 10
+  , paddingH = 10
+  , resizeHandler = Nothing
+  , sortHandler = Nothing
+  }
 
+dateColumn :: Column FileDialogEvent FileData
+dateColumn = Column
+  { name = "Date Modified"
+  , widget = LabelWidget (const getFileTime)
+  , footerWidget = NoFooterWidget
+  , align = ColumnAlignLeft
+  , initialWidth = 200
+  , sortKey = SortWith (getOrd fdTime)
+  , minWidth = 160
+  , paddingW = 10
+  , paddingH = 10
+  , resizeHandler = Nothing
+  , sortHandler = Nothing
+  }
+
+
+newtype OrdPath a = OrdPath { getOrdTuple :: (PathKind, a)}
+  deriving newtype (Ord, Show, Eq)
+
+getOrd :: (FileData -> a) -> FileData -> OrdPath a
+getOrd f fd = OrdPath (fdKind fd, f fd)
+
+{-
+textColumn ::
+  -- | Name of the column, to display in the header.
+  Text ->
+  -- | Called with the item for each row to get the text to display for that row.
+  (a -> Text) ->
+  Column e a
+textColumn name get = (defaultColumn name widget) {sortKey}
+  where
+    widget = LabelWidget (const get)
+    sortKey = SortWith get
+
+defaultColumn :: Text -> ColumnWidget e a -> Column e a
+defaultColumn name widget =
+  Column
+    { name,
+      widget,
+      footerWidget = NoFooterWidget,
+      align = ColumnAlignLeft,
+      initialWidth = defaultColumnInitialWidth,
+      sortKey = DontSort,
+      minWidth = defaultColumnMinWidth,
+      paddingW = defaultColumnPadding,
+      paddingH = defaultColumnPadding,
+      resizeHandler = Nothing,
+      sortHandler = Nothing
+    }
+-}
 
 
 {- 

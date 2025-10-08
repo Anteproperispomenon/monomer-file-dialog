@@ -12,8 +12,10 @@ extra-source-files:
 - README.md
 
 default-extensions:
+- DerivingStrategies
 - FlexibleContexts
 - FlexibleInstances
+- GeneralizedNewtypeDeriving
 - ImportQualifiedPost
 - LambdaCase
 - MultiParamTypeClasses

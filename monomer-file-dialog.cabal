@@ -28,8 +28,10 @@ library
   hs-source-dirs:
       src
   default-extensions:
+      DerivingStrategies
       FlexibleContexts
       FlexibleInstances
+      GeneralizedNewtypeDeriving
       ImportQualifiedPost
       LambdaCase
       MultiParamTypeClasses
@@ -61,8 +63,10 @@ executable app
   hs-source-dirs:
       app
   default-extensions:
+      DerivingStrategies
       FlexibleContexts
       FlexibleInstances
+      GeneralizedNewtypeDeriving
       ImportQualifiedPost
       LambdaCase
       MultiParamTypeClasses
