@@ -1,31 +1,43 @@
-name:                monomer-starter
+name:                monomer-file-dialog
 version:             0.1.0.0
 #synopsis:
 #description:
-homepage:            https://github.com/githubuser/monomer-starter#readme
+homepage:            https://github.com/Anteproperispomenon/monomer-file-dialog
 license:             BSD3
 author:              Author name here
 maintainer:          example@example.com
-copyright:           2021 Author name here
+copyright:           2025 Author name here
 #category:
 extra-source-files:
 - README.md
 
 default-extensions:
+- FlexibleContexts
+- FlexibleInstances
+- ImportQualifiedPost
+- LambdaCase
+- MultiParamTypeClasses
+- MultiWayIf
 - OverloadedStrings
+- PatternSynonyms
+- ScopedTypeVariables
+- TupleSections
+- TypeApplications
 
 dependencies:
   - base >= 4.7 && < 5
+  - containers
   - data-default
+  - directory
+  - filepath
   - lens
   - monomer
   - text
   - text-show
 
-executables:
-  app:
-    source-dirs:      src
-    main:             Main.hs
-    ghc-options:
-    - -fwarn-incomplete-patterns
-    - -threaded
+library:
+  source-dirs: src
+  ghc-options:
+  - -fwarn-incomplete-patterns
+  - -threaded
+
