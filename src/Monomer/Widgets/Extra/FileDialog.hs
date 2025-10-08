@@ -7,6 +7,10 @@ module Monomer.Widgets.Extra.FileDialog
 
 import Control.Lens
 
+import Data.Sequence qualified as Seq
+
+import Monomer.Hagrid
+
 import Monomer.Widgets.Containers.SelectList
 import Monomer.Widgets.Containers.Scroll
 import Monomer.Widgets.Containers.Stack
@@ -31,6 +35,7 @@ import Data.Text qualified as T
 import Data.Time.Clock
 import Data.Time.Format
 
+import Monomer.Widgets.Extra.FileDialog.Column
 
 
 fileDialog :: (CompositeEvent ep, CompParentModel sp) => (OsPath -> ep) -> ALens' sp FileDialogModel -> WidgetNode sp ep
@@ -59,7 +64,7 @@ handleEvent mkEvent wenv wnode model evt = case evt of
   DirUp       -> let (newModel, doEvent) = goUp   model in [Model newModel, Event doEvent]
   SetupDialog -> [Task (SetDir <$> getCurrentDirectory)]
   Refresh     -> [Task (SetFiles <$> getDirData' (model ^. currentDir))]
-  (SetFiles fils) -> [Model (model & dirFiles .~ fils)]
+  (SetFiles fils) -> [Model (model & dirFiles .~ (Seq.fromList fils))]
   (SetDir drt)    -> [Model (model & currentDir .~ drt), Event Refresh]
   NullEvent -> []
   _ -> []
@@ -76,35 +81,21 @@ buildUI wenv model = vstack_ [childSpacing_ 3]
      -- , textField_ currentDir [readOnly]
      , label (T.pack $ show (model ^. currentDir))
      ]
+  , hagrid [nameColumn, extnColumn, sizeColumn] (model ^. dirFiles)
+  {-
   , scroll $ vstack_ [childSpacing_ 1] $ (model ^. dirFiles) <&> \fd -> hstack_ [childSpacing_ 8]
       [ label (T.pack $ show (fdName fd))
       , label (getExtn fd)
       , label (getFileSizeT fd)
       , label (getFileTime  fd)
       ]
+  -}
   -- , label_ (T.pack $ show model) [multiline] -- for debug only
   ]
 
-getExtn :: FileData -> T.Text
-getExtn fd = case (fdExtn fd) of
-  Nothing -> "Directory"
-  (Just ext) -> (T.pack $ show ext) <> " file"
-
-getFileSizeT :: FileData -> T.Text
-getFileSizeT fd = case (fdSize fd) of
-  Nothing   -> "N/A"
-  (Just sz) -> showSize sz
-
-getFileTime :: FileData -> T.Text
-getFileTime fd = T.pack $ formatTime theTimeFormat "%Y-%m-%d, %H:%M" (fdTime fd)
 
 
-theTimeFormat :: TimeLocale
-theTimeFormat = defaultTimeLocale
-  { dateFmt = "%y-%m-%d"
-  , timeFmt = "%H:%M" -- or %H:%M:%S
-  , dateTimeFmt = "%Y-%m-%d, %H:%M"
-  }
+
 
 {-
   { fdName :: OsPath

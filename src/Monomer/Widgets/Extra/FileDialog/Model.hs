@@ -49,7 +49,7 @@ data FileDialogModel = FileDialogModel
   { _currentDir :: OsPath
   , _backButton :: Seq.Seq OsPath
   , _fwdButton  :: Seq.Seq OsPath
-  , _dirFiles   :: [FileData]
+  , _dirFiles   :: Seq.Seq FileData
   , _pathSelect :: T.Text
   , _dialogType :: DialogType
   , _maxBacklog :: Int
@@ -65,7 +65,7 @@ instance Default FileDialogModel where
     { _currentDir = baseDir
     , _backButton = Empty
     , _fwdButton  = Empty
-    , _dirFiles   = []
+    , _dirFiles   = Empty
     , _pathSelect = ""
     , _dialogType = Open
     , _maxBacklog  = 15

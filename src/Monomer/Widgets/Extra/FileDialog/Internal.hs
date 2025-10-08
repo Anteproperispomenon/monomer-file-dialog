@@ -6,6 +6,9 @@ module Monomer.Widgets.Extra.FileDialog.Internal
   , getDirData
   , getDirData'
   , showSize
+  , getExtn
+  , getFileSizeT
+  , getFileTime
   ) where
 
 import System.Directory.OsPath
@@ -22,6 +25,7 @@ import TextShow (showt, showb, toText)
 import TextShow.Data.Floating
 
 import Data.Time.Clock
+import Data.Time.Format
 
 data FileData = FileData
   { fdName :: OsPath
@@ -81,3 +85,23 @@ showSize n
     mags = logBase 1024 nFlo
     newM = floor mags
     fltNum = showbFFloat (Just 2) (nFlo / (1024 ^^ newM))
+
+getExtn :: FileData -> T.Text
+getExtn fd = case (fdExtn fd) of
+  Nothing -> "Directory"
+  (Just ext) -> (T.pack $ show ext) <> " file"
+
+getFileSizeT :: FileData -> T.Text
+getFileSizeT fd = case (fdSize fd) of
+  Nothing   -> "N/A"
+  (Just sz) -> showSize sz
+
+getFileTime :: FileData -> T.Text
+getFileTime fd = T.pack $ formatTime theTimeFormat "%Y-%m-%d, %H:%M" (fdTime fd)
+
+theTimeFormat :: TimeLocale
+theTimeFormat = defaultTimeLocale
+  { dateFmt = "%y-%m-%d"
+  , timeFmt = "%H:%M" -- or %H:%M:%S
+  , dateTimeFmt = "%Y-%m-%d, %H:%M"
+  }

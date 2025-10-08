@@ -32,6 +32,7 @@ dependencies:
   - filepath
   - lens
   - monomer
+  - monomer-hagrid
   - text
   - text-show
   - time

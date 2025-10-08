@@ -19,6 +19,7 @@ extra-source-files:
 library
   exposed-modules:
       Monomer.Widgets.Extra.FileDialog
+      Monomer.Widgets.Extra.FileDialog.Column
       Monomer.Widgets.Extra.FileDialog.Internal
       Monomer.Widgets.Extra.FileDialog.Model
       Monomer.Widgets.Extra.FileDialog.OS
@@ -47,6 +48,7 @@ library
     , filepath
     , lens
     , monomer
+    , monomer-hagrid
     , text
     , text-show
     , time
@@ -80,6 +82,7 @@ executable app
     , lens
     , monomer
     , monomer-file-dialog
+    , monomer-hagrid
     , text
     , text-show
     , time
