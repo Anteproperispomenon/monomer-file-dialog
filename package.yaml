@@ -26,14 +26,15 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-  - containers
+  - containers >= 0.5.8
   - data-default
-  - directory
+  - directory >= 1.3.8
   - filepath
   - lens
   - monomer
   - text
   - text-show
+  - time
 
 library:
   source-dirs: src

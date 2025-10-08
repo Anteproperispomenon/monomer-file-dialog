@@ -17,9 +17,9 @@ import System.IO.Error qualified as IOE
 import Data.Text qualified as T
 import TextShow (showt, showb, toText)
 
-import Numeric
-
 import TextShow.Data.Floating
+
+import Data.Time.Clock
 
 data FileData = FileData
   { fdName :: OsPath
@@ -27,6 +27,7 @@ data FileData = FileData
   , fdExtn :: Maybe OsString
   , fdKind :: PathKind
   , fdSize :: Maybe Integer
+  , fdTime :: UTCTime
   } deriving (Show, Eq)
 
 data PathKind
@@ -41,8 +42,8 @@ getDirData pth = do
   pths <- map (pth </>) <$> listDirectory pth
   dirs <- filterM doesDirectoryExist pths
   fils <- filterM doesFileExist pths
-  let dirs2 = map  (\fp -> FileData (takeFileName fp) fp Nothing           PathDir      Nothing        ) dirs
-  fils2    <- mapM (\fp -> FileData (takeFileName fp) fp (getExtnMaybe fp) PathFile <$> getFileSize' fp) fils
+  dirs2 <- mapM (\fp -> FileData (takeFileName fp) fp Nothing           PathDir      Nothing         <$> getModificationTime fp) dirs
+  fils2 <- mapM (\fp -> FileData (takeFileName fp) fp (getExtnMaybe fp) PathFile <$> getFileSize' fp <*> getModificationTime fp) fils
   return (dirs2, fils2)
   where
     getExtnMaybe :: OsPath -> Maybe OsString

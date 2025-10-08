@@ -1,10 +1,19 @@
-# Monomer starter application
+# Monomer File Dialogs
 
-Starter application for the Monomer library, including:
+I made this because I couldn't get [tinyfiledialogs](https://github.com/mtolly/tinyfiledialogs) to link
+properly on Windows anymore. Hopefully it'll work.
 
-- Dependencies
-- Model and events type
-- Event handler
-- UI builder
+Note that it uses [`OsPath`](https://hackage.haskell.org/package/filepath-1.5.4.0/docs/System-OsPath.html)
+instead of `FilePath`, to improve safety and performance(?).
+
+## Notes
+
+When navigating through the directories, it doesn't actually
+change the current working directory. This is because the present
+working directory is a global state, and it doesn't work well when
+there are multiple working threads. Instead, it keeps an `OsPath`
+value in the working model that 
+
+## Everything Else
 
 For more information, check https://github.com/fjvallarino/monomer.
