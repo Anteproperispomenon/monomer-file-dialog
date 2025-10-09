@@ -7,7 +7,7 @@ cabal-version: 1.12
 name:           monomer-file-dialog
 version:        0.1.0.0
 homepage:       https://github.com/Anteproperispomenon/monomer-file-dialog
-author:         Author name here
+author:         David Wilson
 maintainer:     example@example.com
 copyright:      2025 Author name here
 license:        BSD3
@@ -19,6 +19,7 @@ extra-source-files:
 library
   exposed-modules:
       Monomer.Widgets.Extra.FileDialog
+      Monomer.Widgets.Extra.FileDialog.Helpers
   other-modules:
       Monomer.Widgets.Extra.FileDialog.Column
       Monomer.Widgets.Extra.FileDialog.Internal

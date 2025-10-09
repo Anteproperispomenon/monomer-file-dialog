@@ -1,4 +1,11 @@
-{-# LANGUAGE PackageImports #-}
+{-|
+Module      : Monomer.Widgets.Extra.FileDialog.Internal
+Copyright   : (c) 2025 David Wilson
+License     : BSD-3-Clause (see the LICENSE file)
+
+More internal types for the file dialog.
+
+-}
 
 module Monomer.Widgets.Extra.FileDialog.Internal
   ( FileData(..)
@@ -112,6 +119,9 @@ theTimeFormat = defaultTimeLocale
   , dateTimeFmt = "%Y-%m-%d, %H:%M"
   }
 
+-- | Convert an `OsPath` to `T.Text` simply.
+--   If the conversion fails, it will return
+--   the `T.Text` \"<error>\" instead.
 showFilePath :: OsPath -> T.Text
 showFilePath osPath = case (decodeUtf osPath) of
   (Left _)    -> "<error>"
