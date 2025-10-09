@@ -15,6 +15,7 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , errVis
   , confVis
   , isLoading
+  , dirCount
   , DialogType(..)
   , FileDialogEvent(..)
   , goBack
@@ -25,6 +26,8 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , setSave
   , defFileModel
   ) where
+
+import Data.Word
 
 import Monomer.Widgets.Extra.FileDialog.OS
 
@@ -68,6 +71,7 @@ data FileDialogModel = FileDialogModel
   , _errVis     :: Bool
   , _confVis    :: Bool
   , _isLoading  :: Bool
+  , _dirCount   :: Word16
   } deriving (Show, Eq)
 
 makeLenses 'FileDialogModel
@@ -90,6 +94,7 @@ instance Default FileDialogModel where
     , _errVis     = False
     , _confVis    = False
     , _isLoading  = False
+    , _dirCount   = 0
     }
 
 -- | Change the underlying `FileDialogModel` to
@@ -118,7 +123,7 @@ data FileDialogEvent
   | ChangeDir OsPath -- Set the dir and change fwd/back.
   | ChangeDirSafe OsPath -- Confirm that the dir IS a dir, then change.
   | Refresh -- Populate the dir with the "current" directory.
-  | SetFiles [FileData]
+  | SetFiles Word16 [FileData]
   | FileSelect
   | SetupDialog -- set the current dir to the pwd
   | FocusFile OsPath

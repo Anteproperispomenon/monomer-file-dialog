@@ -79,12 +79,16 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
   DirForward  -> let (newModel, doEvent) = goFwd  model in [Model newModel, Event doEvent]
   DirUp       -> let (newModel, doEvent) = goUp   model in [Model newModel, Event doEvent]
   SetupDialog -> [Task (SetDir <$> getCurrentDirectory)]
-  Refresh     -> 
-    [Task (SetFiles <$> getDirData' (model ^. currentDir))
+  Refresh     -> let newCount = (model ^. dirCount) + 1 in
+    [Task (SetFiles newCount <$> getDirData' (model ^. currentDir))
     , scrollToTop (Proxy :: Proxy FileData) "FileDialogGrid"
-    , Model (model & isLoading .~ True)
+    , Model (model & isLoading .~ True & dirCount .~ newCount)
     ]
-  (SetFiles fils) -> [Model (model & dirFiles .~ (Seq.fromList fils) & isLoading .~ False)]
+  -- Don't set the files if the task is old.
+  (SetFiles setCount fils) -> 
+    if (setCount == (model ^. dirCount))
+      then [Model (model & dirFiles .~ (Seq.fromList fils) & isLoading .~ False)]
+      else []
   (SetDir drt)    -> [Model (model & currentDir .~ drt), Event Refresh]
   (ChangeDir drt) -> let (newModel, doEvent) = goDir drt model in [Model newModel, Event doEvent]
   (ChangeDirSafe drt) -> [Task $ goDirSafe drt]
@@ -117,7 +121,7 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
 -- type UIBuilder s e = WidgetEnv s e -> s -> WidgetNode s e
 
 buildUI :: WidgetEnv FileDialogModel FileDialogEvent -> FileDialogModel -> WidgetNode FileDialogModel FileDialogEvent
-buildUI wenv model = makeLoader (model ^. isLoading) $ keystroke_ 
+buildUI wenv model = {-makeLoader (model ^. isLoading) $-} keystroke_ 
   [ ("Esc", CancelDialog)
   , ("Alt-Left", DirBack)
   , ("Alt-Right", DirForward)
@@ -138,8 +142,8 @@ buildUI wenv model = makeLoader (model ^. isLoading) $ keystroke_
       -- , label (if (model ^. isLoading) then "Loading..." else "Loaded")
       , popup errVis  (box errWidget `styleBasic` [border 3 black, radius 5, bgColor darkGray, padding 10])
       , popup confVis (box ovrWidget `styleBasic` [border 3 black, radius 5, bgColor darkGray, padding 10])
-      , (hagrid_ [initialSort 0 SortAscending] [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles))
-          `nodeKey` "FileDialogGrid"
+      , makeLoader (model ^. isLoading) ((hagrid_ [initialSort 0 SortAscending] [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles))
+          `nodeKey` "FileDialogGrid")
       , hstack_ [childSpacing_ 3]
         [ textField manualPath
         , button "Jump" Jump
