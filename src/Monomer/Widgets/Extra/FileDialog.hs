@@ -112,7 +112,7 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
   SetupDialog -> 
     if (model ^. isSetup)
       then []
-      else [Task (SetDir <$> getCurrentDirectory)]
+      else [Task (SetDir <$> getCurrentDirectory), Model (model & isSetup .~ True)]
   Refresh     -> let newCount = (model ^. dirCount) + 1 in
     [Task (SetFiles newCount <$> getDirData' (model ^. currentDir))
     , scrollToTop (Proxy :: Proxy FileData) "FileDialogGrid"
