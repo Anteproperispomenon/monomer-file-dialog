@@ -12,6 +12,8 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , manualPath
   , focusFile
   , fileError
+  , errVis
+  , confVis
   , DialogType(..)
   , FileDialogEvent(..)
   , goBack
@@ -62,6 +64,8 @@ data FileDialogModel = FileDialogModel
   , _manualPath :: T.Text -- Entered by user.
   , _focusFile  :: Maybe OsPath
   , _fileError  :: T.Text
+  , _errVis     :: Bool
+  , _confVis    :: Bool
   } deriving (Show, Eq)
 
 makeLenses 'FileDialogModel
@@ -81,6 +85,8 @@ instance Default FileDialogModel where
     , _manualPath = ""
     , _focusFile  = Nothing
     , _fileError  = ""
+    , _errVis     = False
+    , _confVis    = False
     }
 
 -- | Change the underlying `FileDialogModel` to
@@ -116,6 +122,9 @@ data FileDialogEvent
   | ErrEvent T.Text
   | Jump
   | CheckFile
+  | OverwriteFile OsPath
+  | ClosePopups
+  | ConfirmOverwrite
   | DoneFile OsPath
   | CancelDialog -- Stop Searching for a file
   | NullEvent   -- Do Nothing

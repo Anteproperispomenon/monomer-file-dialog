@@ -26,6 +26,8 @@ data AppEvent
   = AppInit
   | AppIncrease
   | AppSetPath OsPath
+  | AppSetSave
+  | AppSetOpen
   | AppNull
   deriving (Eq, Show)
 
@@ -44,6 +46,10 @@ buildUI wenv model = widgetTree where
        [ label $ "Click count: " <> showt (model ^. clickCount)
        , spacer
        , button "Increase count" AppIncrease
+       , spacer
+       , button "Save" AppSetSave
+       , spacer
+       , button "Open" AppSetOpen
        ]
     , fileDialog AppSetPath AppNull fileModel
     ] `styleBasic` [padding 10]
@@ -58,6 +64,8 @@ handleEvent wenv node model evt = case evt of
   AppInit -> []
   AppIncrease -> [Model (model & clickCount +~ 1)]
   (AppSetPath pth) -> [Model (model & thatFile .~ (Just pth))]
+  AppSetOpen -> [Model (model & fileModel %~ setOpen)]
+  AppSetSave -> [Model (model & fileModel %~ setSave)]
   _ -> []
 
 main :: IO ()

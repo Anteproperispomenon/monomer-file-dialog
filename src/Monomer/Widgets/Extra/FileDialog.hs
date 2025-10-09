@@ -3,7 +3,11 @@ module Monomer.Widgets.Extra.FileDialog
   ( fileDialog
   , FileDialogModel
   , defFileModel
+  , setOpen
+  , setSave
   ) where
+
+import Monomer.Graphics.ColorTable
 
 import Data.Proxy
 
@@ -17,11 +21,12 @@ import Monomer.Widgets.Containers.Keystroke
 -- import Monomer.Widgets.Containers.SelectList 
 import Monomer.Widgets.Containers.Scroll
 import Monomer.Widgets.Containers.Stack
-import Monomer.Widgets.Containers.Grid
+import Monomer.Widgets.Containers.Box
 import Monomer.Widgets.Composite
 
 import Monomer.Widgets.Singles.Button
 import Monomer.Widgets.Singles.Label
+import Monomer.Widgets.Singles.Spacer
 import Monomer.Widgets.Singles.TextField
 
 import Monomer.Widgets.Extra.FileDialog.Internal
@@ -42,6 +47,7 @@ import Monomer.Widgets.Extra.FileDialog.Column
 
 import Monomer.Core.StyleUtil
 
+import Monomer.Widgets.Containers.Popup
 
 fileDialog :: (CompositeEvent ep, CompParentModel sp) => (OsPath -> ep) -> ep -> ALens' sp FileDialogModel -> WidgetNode sp ep
 fileDialog mkEvt cancelEvt modelLens
@@ -83,10 +89,21 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
     ""  -> [Event (ErrEvent "Empty manual path")] -- maybe check focusFile
     txt -> case (model ^. dialogType) of
       Open -> [Task $ openFileT (model ^. currentDir) txt]
-      Save -> []
+      Save -> [Task $ saveFileT (model ^. currentDir) txt]
   (DoneFile pth) -> [Report (mkEvent pth)]
+  (OverwriteFile fp) -> 
+    [Model 
+      (model
+        & focusFile .~ (Just fp)
+        & confVis   .~ True
+      )
+    ]
+  ConfirmOverwrite -> case (model ^. focusFile) of
+    Nothing    -> [Event ClosePopups, Event (ErrEvent ("No focus file listed."))]
+    (Just fil) -> [ Event ClosePopups, Report (mkEvent fil)]
+  ClosePopups -> [Model (model & confVis .~ False & errVis .~ False)]
   NullEvent -> []
-  (ErrEvent err) -> [Model (model & fileError .~ err)]
+  (ErrEvent err) -> [Model (model & fileError .~ err & errVis .~ True)]
   _ -> []
 
 -- type UIBuilder s e = WidgetEnv s e -> s -> WidgetNode s e
@@ -107,9 +124,11 @@ buildUI wenv model = keystroke_
          , button "Up" DirUp
          , button "Ref" Refresh
          -- , textField_ currentDir [readOnly]
-         , label (T.pack $ show (model ^. currentDir))
+         , label (showFilePath (model ^. currentDir))
          ]
       , label ("Error: " <> (model ^. fileError))
+      , popup errVis  (box errWidget `styleBasic` [border 3 black, bgColor darkGray])
+      , popup confVis (box ovrWidget `styleBasic` [border 3 black, bgColor darkGray])
       , (hagrid_ [initialSort 0 SortAscending] [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles))
           `nodeKey` "FileDialogGrid"
       , hstack_ [childSpacing_ 3]
@@ -118,16 +137,26 @@ buildUI wenv model = keystroke_
         , button (T.pack $ show (_dialogType model)) CheckFile
     
         ]
-  {-  
-  , scroll $ vstack_ [childSpacing_ 1] $ (model ^. dirFiles) <&> \fd -> hstack_ [childSpacing_ 8]
-      [ label (T.pack $ show (fdName fd))
-      , label (getExtn fd)
-      , label (getFileSizeT fd)
-      , label (getFileTime  fd)
-      ]
-  -}
-  -- , label_ (T.pack $ show model) [multiline] -- for debug only
   ]
+  where
+    errWidget = vstack_ [childSpacing_ 8]
+      [ label "Error" `styleBasic` [textSize 24, textLeft]
+      , spacer
+      , label_ (model ^. fileError) [multiline]
+      , button "Okay" ClosePopups
+      ]
+    ovrWidget = vstack_ [childSpacing_ 8]
+      [ label "Overwrite File?" `styleBasic` [textSize 24, textLeft]
+      , spacer
+      , case (model ^. focusFile) of
+          Nothing    -> label "The file already exists." -- ???
+          (Just fil) -> label_ ("The file \"" <> (showFilePath fil) <> "\" already exists. Overwrite it?") [multiline]
+      , hstack_ [childSpacing_ 30]
+        [ button "Cancel" ClosePopups
+        , mainButton "Save" ConfirmOverwrite
+        ]
+
+      ]
 
 -- | Check that a directory exists before
 --   changing to it.
@@ -188,6 +217,40 @@ openFileT pwd txt = do
           if bl2
             then return (ChangeDir theFile) -- since it's a dir that exists.
             else return (ErrEvent $ txt <> " does not exist.")
+
+saveFileT :: OsPath -> T.Text -> IO FileDialogEvent
+saveFileT pwd txt = do
+  newFile <- encodeFS (T.unpack txt)
+  if isAbsolute newFile
+    then do 
+      bl <- doesFileExist newFile
+      if bl
+        then return (OverwriteFile newFile)
+        else do
+          bl2 <- doesDirectoryExist newFile
+          if bl2
+            then return (ChangeDir newFile)
+            else do
+              let fileDir = dropFileName newFile
+              bl3 <- doesDirectoryExist fileDir
+              if bl3
+                then return (DoneFile newFile)
+                else return (ErrEvent ("Directory " <> (showFilePath fileDir) <> " does not exist."))
+    else do
+      let theFile = pwd </> theFile
+      bl <- doesFileExist theFile
+      if bl
+        then return (OverwriteFile theFile)
+        else do
+          bl2 <- doesDirectoryExist theFile
+          if bl2
+            then return (ChangeDir theFile)
+            else do
+              let fileDir = dropFileName theFile
+              bl3 <- doesDirectoryExist fileDir
+              if bl3
+                then return (DoneFile theFile)
+                else return (ErrEvent ("Directory " <> (showFilePath fileDir) <> " does not exist."))
 
 {-
   { fdName :: OsPath
