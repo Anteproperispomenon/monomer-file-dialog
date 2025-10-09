@@ -14,6 +14,7 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , goBack
   , goFwd
   , goUp
+  , goDir
   , defFileModel
   ) where
 
@@ -53,6 +54,7 @@ data FileDialogModel = FileDialogModel
   , _pathSelect :: T.Text
   , _dialogType :: DialogType
   , _maxBacklog :: Int
+  , _focusFile  :: Maybe OsPath
   } deriving (Show, Eq)
 
 makeLenses 'FileDialogModel
@@ -68,7 +70,8 @@ instance Default FileDialogModel where
     , _dirFiles   = Empty
     , _pathSelect = ""
     , _dialogType = Open
-    , _maxBacklog  = 15
+    , _maxBacklog = 15
+    , _focusFile  = Nothing
     }
 
 data FileDialogEvent
@@ -76,13 +79,15 @@ data FileDialogEvent
   | DirForward
   | DirUp
   | DirJump T.Text
-  | SetDir OsPath -- Set the dir, but don't populate the file list.
-  | ChangeDir OsPath -- Set the dir and populate the file list (but don't change back/fwd).
-  | ChangeToDir OsPath -- Set the dir, populate the file list, modify the back/fwd lists.
+  | SetDir OsPath -- Set the dir without changing fwd/back.
+  | ChangeDir OsPath -- Set the dir and change fwd/back.
+  | ChangeDirSafe OsPath -- Confirm that the dir IS a dir, then change.
   | Refresh -- Populate the dir with the "current" directory.
   | SetFiles [FileData]
   | FileSelect
   | SetupDialog -- set the current dir to the pwd
+  | FocusFile OsPath
+  | ErrEvent T.Text
   | NullEvent   -- Do Nothing
   deriving (Show, Eq)
 
@@ -165,4 +170,26 @@ goUp model
     mx  = _maxBacklog model
 
 
+goDir :: OsPath -> FileDialogModel -> (FileDialogModel, FileDialogEvent)
+goDir newDir model
+  | (oldDir == newDir) = (model, NullEvent)
+  | (Seq.length (_backButton model) >= mx)
+  , (_ :<| bckRst) <- (_backButton model)
+  = ( model
+       & currentDir .~ newDir
+       & fwdButton  .~ Empty
+       & backButton .~ (bckRst |> oldDir)
+    , Refresh
+    )
+  | bckRst <- (_backButton model)
+  = ( model
+       & currentDir .~ newDir
+       & fwdButton  .~ Empty
+       & backButton .~ (bckRst |> oldDir)
+    , Refresh
+    )
+  | otherwise = (model, NullEvent)
+  where
+    oldDir = _currentDir model
+    mx     = _maxBacklog model
 

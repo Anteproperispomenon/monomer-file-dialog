@@ -15,6 +15,13 @@ import Monomer.Widgets.Extra.FileDialog.Internal
 
 import Data.Text qualified as T
 
+import Monomer.Widgets.Containers.Box
+
+import Monomer.Widgets.Singles.Label
+
+import Monomer.Core.Combinators hiding (minWidth)
+import Monomer.Core.WidgetTypes
+
 -- Needs to be changed so that it sorts on
 -- 
 sizeColumn :: Column FileDialogEvent FileData
@@ -54,7 +61,8 @@ nameColumn :: Column FileDialogEvent FileData
 -- nameColumn = showOrdColumn "File Name" (fdName)
 nameColumn = Column
   { name = "File Name"
-  , widget = LabelWidget (const (showFilePath . fdName))
+  -- , widget = LabelWidget (const (showFilePath . fdName))
+  , widget = CustomWidget clickLabel
   , footerWidget = NoFooterWidget
   , align = ColumnAlignLeft
   , initialWidth = 320
@@ -117,6 +125,10 @@ defaultColumn name widget =
     }
 -}
 
+clickLabel :: forall s. WidgetModel s => Int -> FileData -> WidgetNode s FileDialogEvent
+clickLabel _n fd = case (fdKind fd) of
+  PathDir  -> box_ [onClick (ChangeDir (fdPath fd))] (label (showFilePath $ fdName fd))
+  PathFile -> box_ [onClick (FocusFile (fdPath fd))] (label (showFilePath $ fdName fd))
 
 {- 
 -- defaultColumn is not exported.

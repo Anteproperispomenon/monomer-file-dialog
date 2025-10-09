@@ -66,7 +66,10 @@ handleEvent mkEvent wenv wnode model evt = case evt of
   Refresh     -> [Task (SetFiles <$> getDirData' (model ^. currentDir))]
   (SetFiles fils) -> [Model (model & dirFiles .~ (Seq.fromList fils))]
   (SetDir drt)    -> [Model (model & currentDir .~ drt), Event Refresh]
+  (ChangeDir drt) -> let (newModel, doEvent) = goDir drt model in [Model newModel, Event doEvent]
+  (ChangeDirSafe drt) -> [Task $ goDirSafe drt]
   NullEvent -> []
+  (ErrEvent err) -> []
   _ -> []
 
 -- type UIBuilder s e = WidgetEnv s e -> s -> WidgetNode s e
@@ -93,7 +96,17 @@ buildUI wenv model = vstack_ [childSpacing_ 3]
   -- , label_ (T.pack $ show model) [multiline] -- for debug only
   ]
 
-
+-- | Check that a directory exists before
+--   changing to it.
+goDirSafe :: OsPath -> IO FileDialogEvent
+goDirSafe osPath = do
+  bl <- doesDirectoryExist osPath
+  -- str <- T.pack <$> decodeFS osPath
+  if bl
+    then (return (ChangeDir osPath))
+    else do 
+      str <- T.pack <$> decodeFS osPath
+      (return (ErrEvent ("Directory does not exist: " <> str)))
 
 
 
