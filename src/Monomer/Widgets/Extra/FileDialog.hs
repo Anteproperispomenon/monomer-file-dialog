@@ -5,13 +5,16 @@ module Monomer.Widgets.Extra.FileDialog
   , defFileModel
   ) where
 
+import Data.Proxy
+
 import Control.Lens
 
 import Data.Sequence qualified as Seq
 
 import Monomer.Hagrid
 
-import Monomer.Widgets.Containers.SelectList
+import Monomer.Widgets.Containers.Keystroke
+-- import Monomer.Widgets.Containers.SelectList 
 import Monomer.Widgets.Containers.Scroll
 import Monomer.Widgets.Containers.Stack
 import Monomer.Widgets.Containers.Grid
@@ -37,14 +40,16 @@ import Data.Time.Format
 
 import Monomer.Widgets.Extra.FileDialog.Column
 
+import Monomer.Core.StyleUtil
 
-fileDialog :: (CompositeEvent ep, CompParentModel sp) => (OsPath -> ep) -> ALens' sp FileDialogModel -> WidgetNode sp ep
-fileDialog mkEvt modelLens
+
+fileDialog :: (CompositeEvent ep, CompParentModel sp) => (OsPath -> ep) -> ep -> ALens' sp FileDialogModel -> WidgetNode sp ep
+fileDialog mkEvt cancelEvt modelLens
   = composite_
       "FileDialog"
       modelLens
       buildUI
-      (handleEvent mkEvt)
+      (handleEvent mkEvt cancelEvt)
       [onInit SetupDialog]
 
 
@@ -53,21 +58,24 @@ fileDialog mkEvt modelLens
 handleEvent 
   :: (CompositeEvent ep, CompParentModel sp)
   => (OsPath -> ep)
+  -> ep
   -> WidgetEnv  FileDialogModel FileDialogEvent 
   -> WidgetNode FileDialogModel FileDialogEvent
   -> FileDialogModel
   -> FileDialogEvent
   -> [EventResponse FileDialogModel FileDialogEvent sp ep]
-handleEvent mkEvent wenv wnode model evt = case evt of
+handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
   DirBack     -> let (newModel, doEvent) = goBack model in [Model newModel, Event doEvent]
   DirForward  -> let (newModel, doEvent) = goFwd  model in [Model newModel, Event doEvent]
   DirUp       -> let (newModel, doEvent) = goUp   model in [Model newModel, Event doEvent]
   SetupDialog -> [Task (SetDir <$> getCurrentDirectory)]
-  Refresh     -> [Task (SetFiles <$> getDirData' (model ^. currentDir))]
+  Refresh     -> [Task (SetFiles <$> getDirData' (model ^. currentDir)), scrollToTop (Proxy :: Proxy FileData) "FileDialogGrid"]
   (SetFiles fils) -> [Model (model & dirFiles .~ (Seq.fromList fils))]
   (SetDir drt)    -> [Model (model & currentDir .~ drt), Event Refresh]
   (ChangeDir drt) -> let (newModel, doEvent) = goDir drt model in [Model newModel, Event doEvent]
   (ChangeDirSafe drt) -> [Task $ goDirSafe drt]
+  (FocusFile osPath)  -> [(Model (model & manualPath .~ (showFilePath osPath)))]
+  CancelDialog        -> [Report cancelEvt]
   NullEvent -> []
   (ErrEvent err) -> []
   _ -> []
@@ -75,17 +83,32 @@ handleEvent mkEvent wenv wnode model evt = case evt of
 -- type UIBuilder s e = WidgetEnv s e -> s -> WidgetNode s e
 
 buildUI :: WidgetEnv FileDialogModel FileDialogEvent -> FileDialogModel -> WidgetNode FileDialogModel FileDialogEvent
-buildUI wenv model = vstack_ [childSpacing_ 3]
-  [ hstack_ [childSpacing_ 3]
-     [ button "<-" DirBack
-     , button "->" DirForward
-     , button "Up" DirUp
-     , button "Ref" Refresh
-     -- , textField_ currentDir [readOnly]
-     , label (T.pack $ show (model ^. currentDir))
-     ]
-  , hagrid [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles)
-  {-
+buildUI wenv model = keystroke_ 
+  [ ("Esc", CancelDialog)
+  , ("Alt-Left", DirBack)
+  , ("Alt-Right", DirForward)
+  , ("Alt-Up", DirUp)
+  , ("Enter" , NullEvent) -- Fix this
+  ]
+  [ignoreChildrenEvts]
+  $ vstack_ [childSpacing_ 3]
+      [ hstack_ [childSpacing_ 3]
+         [ button "<-" DirBack
+         , button "->" DirForward
+         , button "Up" DirUp
+         , button "Ref" Refresh
+         -- , textField_ currentDir [readOnly]
+         , label (T.pack $ show (model ^. currentDir))
+         ]
+      , (hagrid_ [initialSort 0 SortAscending] [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles))
+          `nodeKey` "FileDialogGrid"
+      , hstack_ [childSpacing_ 3]
+        [ textField manualPath
+        , button "Jump" NullEvent
+        , button (T.pack $ show (_dialogType model)) NullEvent
+    
+        ]
+  {-  
   , scroll $ vstack_ [childSpacing_ 1] $ (model ^. dirFiles) <&> \fd -> hstack_ [childSpacing_ 8]
       [ label (T.pack $ show (fdName fd))
       , label (getExtn fd)
@@ -108,7 +131,9 @@ goDirSafe osPath = do
       str <- T.pack <$> decodeFS osPath
       (return (ErrEvent ("Directory does not exist: " <> str)))
 
-
+-- goDirSafeT :: OsPath -> T.Text -> IO FileDialogEvent
+-- goDirSafeT pwd txt = do
+--   bl <- doesDirectoryExist 
 
 {-
   { fdName :: OsPath

@@ -5,7 +5,10 @@ module Monomer.Widgets.Extra.FileDialog.Column
   , extnColumn
   , nameColumn
   , dateColumn
+  , scrollToTop
   ) where
+
+import Data.Proxy
 
 import Monomer.Hagrid
 
@@ -13,7 +16,12 @@ import Monomer.Widgets.Extra.FileDialog.Model
 
 import Monomer.Widgets.Extra.FileDialog.Internal
 
+import Monomer.Widgets.Composite (EventResponse)
+
 import Data.Text qualified as T
+
+import Data.Sequence qualified as Seq
+import Data.Sequence (Seq(..))
 
 import Monomer.Widgets.Containers.Box
 
@@ -21,6 +29,8 @@ import Monomer.Widgets.Singles.Label
 
 import Monomer.Core.Combinators hiding (minWidth)
 import Monomer.Core.WidgetTypes
+
+import Data.Typeable
 
 -- Needs to be changed so that it sorts on
 -- 
@@ -129,6 +139,13 @@ clickLabel :: forall s. WidgetModel s => Int -> FileData -> WidgetNode s FileDia
 clickLabel _n fd = case (fdKind fd) of
   PathDir  -> box_ [onClick (ChangeDir (fdPath fd))] (label (showFilePath $ fdName fd))
   PathFile -> box_ [onClick (FocusFile (fdPath fd))] (label (showFilePath $ fdName fd))
+
+scrollToTop :: forall s e sp ep a. (Typeable a, Typeable e) => Proxy a -> WidgetKey -> EventResponse s e sp ep
+scrollToTop _ wkey = scrollToRow wkey callback
+  where
+    callback :: Seq.Seq (ItemWithIndex a) -> Maybe Int
+    callback Empty     = Nothing
+    callback (_ :<| _) = Just 0
 
 {- 
 -- defaultColumn is not exported.

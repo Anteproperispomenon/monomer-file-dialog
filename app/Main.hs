@@ -39,7 +39,7 @@ buildUI wenv model = widgetTree where
        , spacer
        , button "Increase count" AppIncrease
        ]
-    , fileDialog (\_ -> AppNull) fileModel
+    , fileDialog (\_ -> AppNull) AppNull fileModel
     ] `styleBasic` [padding 10]
 
 handleEvent

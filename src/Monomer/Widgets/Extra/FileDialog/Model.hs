@@ -9,6 +9,8 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , dirFiles
   , pathSelect
   , dialogType
+  , manualPath
+  , focusFile
   , DialogType(..)
   , FileDialogEvent(..)
   , goBack
@@ -54,6 +56,7 @@ data FileDialogModel = FileDialogModel
   , _pathSelect :: T.Text
   , _dialogType :: DialogType
   , _maxBacklog :: Int
+  , _manualPath :: T.Text -- Entered by user.
   , _focusFile  :: Maybe OsPath
   } deriving (Show, Eq)
 
@@ -71,6 +74,7 @@ instance Default FileDialogModel where
     , _pathSelect = ""
     , _dialogType = Open
     , _maxBacklog = 15
+    , _manualPath = ""
     , _focusFile  = Nothing
     }
 
@@ -88,6 +92,7 @@ data FileDialogEvent
   | SetupDialog -- set the current dir to the pwd
   | FocusFile OsPath
   | ErrEvent T.Text
+  | CancelDialog -- Stop Searching for a file
   | NullEvent   -- Do Nothing
   deriving (Show, Eq)
 
