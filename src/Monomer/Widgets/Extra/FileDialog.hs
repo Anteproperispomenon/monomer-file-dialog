@@ -109,7 +109,10 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
   DirBack     -> let (newModel, doEvent) = goBack model in [Model newModel, Event doEvent]
   DirForward  -> let (newModel, doEvent) = goFwd  model in [Model newModel, Event doEvent]
   DirUp       -> let (newModel, doEvent) = goUp   model in [Model newModel, Event doEvent]
-  SetupDialog -> [Task (SetDir <$> getCurrentDirectory)]
+  SetupDialog -> 
+    if (model ^. isSetup)
+      then []
+      else [Task (SetDir <$> getCurrentDirectory)]
   Refresh     -> let newCount = (model ^. dirCount) + 1 in
     [Task (SetFiles newCount <$> getDirData' (model ^. currentDir))
     , scrollToTop (Proxy :: Proxy FileData) "FileDialogGrid"
