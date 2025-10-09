@@ -25,12 +25,17 @@ import Data.Sequence (Seq(..))
 
 import Monomer.Widgets.Containers.Box
 
+import Monomer.Widgets.Singles.Button
 import Monomer.Widgets.Singles.Label
 
 import Monomer.Core.Combinators hiding (minWidth)
 import Monomer.Core.WidgetTypes
 
 import Data.Typeable
+
+import Monomer.Graphics.Util
+
+import Monomer.Graphics.ColorTable
 
 -- Needs to be changed so that it sorts on
 -- 
@@ -137,8 +142,19 @@ defaultColumn name widget =
 
 clickLabel :: forall s. WidgetModel s => Int -> FileData -> WidgetNode s FileDialogEvent
 clickLabel _n fd = case (fdKind fd) of
-  PathDir  -> box_ [onClick (ChangeDir (fdPath fd))] (label (showFilePath $ fdName fd))
-  PathFile -> box_ [onClick (FocusFile (fdPath fd))] (label (showFilePath $ fdName fd))
+  PathDir  -> button (showFilePath $ fdName fd) (ChangeDir (fdPath fd)) `styleBasic` theStyleD
+  PathFile -> button (showFilePath $ fdName fd) (FocusFile (fdPath fd)) `styleBasic` theStyleF
+  -- PathDir  -> box_ [onClick (ChangeDir (fdPath fd))] (label (showFilePath $ fdName fd))
+  -- PathFile -> box_ [onClick (FocusFile (fdPath fd))] (label (showFilePath $ fdName fd))
+  where
+    theStyle
+      = [ textLeft
+        , border 1 transparent
+        , bgColor transparent
+        -- , textColor (rgbHex "#3399FF")
+        ]
+    theStyleD = (textColor (rgbHex "#00CC00")) : theStyle
+    theStyleF = (textColor (rgbHex "#3399FF")) : theStyle
 
 scrollToTop :: forall s e sp ep a. (Typeable a, Typeable e) => Proxy a -> WidgetKey -> EventResponse s e sp ep
 scrollToTop _ wkey = scrollToRow wkey callback

@@ -127,8 +127,8 @@ buildUI wenv model = keystroke_
          , label (showFilePath (model ^. currentDir))
          ]
       , label ("Error: " <> (model ^. fileError))
-      , popup errVis  (box errWidget `styleBasic` [border 3 black, bgColor darkGray])
-      , popup confVis (box ovrWidget `styleBasic` [border 3 black, bgColor darkGray])
+      , popup errVis  (box errWidget `styleBasic` [border 3 black, radius 5, bgColor darkGray, padding 10])
+      , popup confVis (box ovrWidget `styleBasic` [border 3 black, radius 5, bgColor darkGray, padding 10])
       , (hagrid_ [initialSort 0 SortAscending] [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles))
           `nodeKey` "FileDialogGrid"
       , hstack_ [childSpacing_ 3]
@@ -143,16 +143,18 @@ buildUI wenv model = keystroke_
       [ label "Error" `styleBasic` [textSize 24, textLeft]
       , spacer
       , label_ (model ^. fileError) [multiline]
-      , button "Okay" ClosePopups
+      , hstack [filler, button "Okay" ClosePopups]
       ]
     ovrWidget = vstack_ [childSpacing_ 8]
       [ label "Overwrite File?" `styleBasic` [textSize 24, textLeft]
       , spacer
       , case (model ^. focusFile) of
           Nothing    -> label "The file already exists." -- ???
-          (Just fil) -> label_ ("The file \"" <> (showFilePath fil) <> "\" already exists. Overwrite it?") [multiline]
+          (Just fil) -> label_ ("The file \"" <> (showFilePath fil) <> "\" already exists.\nOverwrite it?") [multiline]
+      , spacer
       , hstack_ [childSpacing_ 30]
-        [ button "Cancel" ClosePopups
+        [ filler 
+        , button "Cancel" ClosePopups
         , mainButton "Save" ConfirmOverwrite
         ]
 
