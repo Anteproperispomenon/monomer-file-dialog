@@ -58,7 +58,7 @@ getDirData pth = do
   where
     getExtnMaybe :: OsPath -> Maybe OsString
     getExtnMaybe pt
-      | (hasExtension pt) = Just (takeExtensions pt)
+      | (hasExtension pt) = Just (takeExtension pt)
       | otherwise         = Nothing
 
 getDirData' :: OsPath -> IO [FileData]
