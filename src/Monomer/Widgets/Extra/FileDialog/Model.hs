@@ -11,12 +11,15 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , dialogType
   , manualPath
   , focusFile
+  , fileError
   , DialogType(..)
   , FileDialogEvent(..)
   , goBack
   , goFwd
   , goUp
   , goDir
+  , setOpen
+  , setSave
   , defFileModel
   ) where
 
@@ -58,6 +61,7 @@ data FileDialogModel = FileDialogModel
   , _maxBacklog :: Int
   , _manualPath :: T.Text -- Entered by user.
   , _focusFile  :: Maybe OsPath
+  , _fileError  :: T.Text
   } deriving (Show, Eq)
 
 makeLenses 'FileDialogModel
@@ -76,8 +80,26 @@ instance Default FileDialogModel where
     , _maxBacklog = 15
     , _manualPath = ""
     , _focusFile  = Nothing
+    , _fileError  = ""
     }
 
+-- | Change the underlying `FileDialogModel` to
+--   work in "Open File" mode. This will reject
+--   returning any files that don't exist. You can
+--   use this with `(%~)` to change the value,
+--   e.g. @[Model (model & fdModel %~ setOpen)]@.
+setOpen :: FileDialogModel -> FileDialogModel
+setOpen model = model {_dialogType = Open}
+
+-- | Change the underlying `FileDialogModel` to
+--   work in "Save File" mode. This will notify
+--   the user before returning files that already
+--   exist. You can use this with `(%~)` to change the 
+--   value, e.g. @[Model (model & fdModel %~ setOpen)]@.
+setSave :: FileDialogModel -> FileDialogModel
+setSave model = model {_dialogType = Save}
+
+-- Serious feature/event creep...
 data FileDialogEvent
   = DirBack
   | DirForward
@@ -92,6 +114,9 @@ data FileDialogEvent
   | SetupDialog -- set the current dir to the pwd
   | FocusFile OsPath
   | ErrEvent T.Text
+  | Jump
+  | CheckFile
+  | DoneFile OsPath
   | CancelDialog -- Stop Searching for a file
   | NullEvent   -- Do Nothing
   deriving (Show, Eq)

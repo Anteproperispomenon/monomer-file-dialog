@@ -76,8 +76,17 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
   (ChangeDirSafe drt) -> [Task $ goDirSafe drt]
   (FocusFile osPath)  -> [(Model (model & manualPath .~ (showFilePath osPath)))]
   CancelDialog        -> [Report cancelEvt]
+  Jump -> case (model ^. manualPath) of
+    ""  -> []
+    txt -> [Task $ goDirSafeT (model ^. currentDir) txt]
+  CheckFile -> case (model ^. manualPath) of
+    ""  -> [Event (ErrEvent "Empty manual path")] -- maybe check focusFile
+    txt -> case (model ^. dialogType) of
+      Open -> [Task $ openFileT (model ^. currentDir) txt]
+      Save -> []
+  (DoneFile pth) -> [Report (mkEvent pth)]
   NullEvent -> []
-  (ErrEvent err) -> []
+  (ErrEvent err) -> [Model (model & fileError .~ err)]
   _ -> []
 
 -- type UIBuilder s e = WidgetEnv s e -> s -> WidgetNode s e
@@ -100,12 +109,13 @@ buildUI wenv model = keystroke_
          -- , textField_ currentDir [readOnly]
          , label (T.pack $ show (model ^. currentDir))
          ]
+      , label ("Error: " <> (model ^. fileError))
       , (hagrid_ [initialSort 0 SortAscending] [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles))
           `nodeKey` "FileDialogGrid"
       , hstack_ [childSpacing_ 3]
         [ textField manualPath
-        , button "Jump" NullEvent
-        , button (T.pack $ show (_dialogType model)) NullEvent
+        , button "Jump" Jump
+        , button (T.pack $ show (_dialogType model)) CheckFile
     
         ]
   {-  
@@ -131,9 +141,53 @@ goDirSafe osPath = do
       str <- T.pack <$> decodeFS osPath
       (return (ErrEvent ("Directory does not exist: " <> str)))
 
--- goDirSafeT :: OsPath -> T.Text -> IO FileDialogEvent
--- goDirSafeT pwd txt = do
---   bl <- doesDirectoryExist 
+goDirSafeT :: OsPath -> T.Text -> IO FileDialogEvent
+goDirSafeT pwd txt = do
+  newDir <- encodeFS (T.unpack txt)
+  if isAbsolute newDir
+    then do
+      bl <- doesDirectoryExist newDir
+      if bl
+        then return (ChangeDir newDir)
+        else do 
+          bl2 <- doesPathExist newDir
+          if bl2
+            then return (ErrEvent $ txt <> " is a file, not a directory.")
+            else return (ErrEvent $ txt <> " does not exist.")
+    else do
+      let theDir = pwd </> newDir
+      bl <- doesDirectoryExist theDir
+      if bl
+        then return (ChangeDir theDir)
+        else do
+          bl2 <- doesPathExist theDir
+          if bl2
+            then return (ErrEvent $ txt <> " is a file, not a directory.")
+            else return (ErrEvent $ txt <> " does not exist.")
+  
+openFileT :: OsPath -> T.Text -> IO FileDialogEvent
+openFileT pwd txt = do
+  newFile <- encodeFS (T.unpack txt)
+  if isAbsolute newFile
+    then do 
+      bl <- doesFileExist newFile
+      if bl
+        then return (DoneFile newFile)
+        else do
+          bl2 <- doesDirectoryExist newFile
+          if bl2
+            then return (ChangeDir newFile) -- since it's a dir that exists.
+            else return (ErrEvent $ txt <> " does not exist.")
+    else do
+      let theFile = pwd </> theFile
+      bl <- doesFileExist theFile
+      if bl
+        then return (DoneFile theFile)
+        else do
+          bl2 <- doesDirectoryExist theFile
+          if bl2
+            then return (ChangeDir theFile) -- since it's a dir that exists.
+            else return (ErrEvent $ txt <> " does not exist.")
 
 {-
   { fdName :: OsPath

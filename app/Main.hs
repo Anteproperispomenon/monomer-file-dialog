@@ -6,6 +6,7 @@ module Main where
 import Control.Lens
 import Data.Maybe
 import Data.Text (Text)
+import Data.Text qualified as T
 import Monomer
 import TextShow
 
@@ -13,14 +14,18 @@ import qualified Monomer.Lens as L
 
 import Monomer.Widgets.Extra.FileDialog
 
+import System.OsPath
+
 data AppModel = AppModel 
   { _clickCount :: Int
+  , _thatFile   :: Maybe OsPath
   , _fileModel  :: FileDialogModel
   } deriving (Eq, Show)
 
 data AppEvent
   = AppInit
   | AppIncrease
+  | AppSetPath OsPath
   | AppNull
   deriving (Eq, Show)
 
@@ -33,13 +38,14 @@ buildUI
 buildUI wenv model = widgetTree where
   widgetTree = vstack 
     [ label "Hello world"
+    , label (T.pack $ show (model ^. thatFile))
     , spacer
     , hstack 
        [ label $ "Click count: " <> showt (model ^. clickCount)
        , spacer
        , button "Increase count" AppIncrease
        ]
-    , fileDialog (\_ -> AppNull) AppNull fileModel
+    , fileDialog AppSetPath AppNull fileModel
     ] `styleBasic` [padding 10]
 
 handleEvent
@@ -51,6 +57,7 @@ handleEvent
 handleEvent wenv node model evt = case evt of
   AppInit -> []
   AppIncrease -> [Model (model & clickCount +~ 1)]
+  (AppSetPath pth) -> [Model (model & thatFile .~ (Just pth))]
   _ -> []
 
 main :: IO ()
@@ -64,4 +71,4 @@ main = do
       appFontDef "Regular" "./assets/fonts/Roboto-Regular.ttf",
       appInitEvent AppInit
       ]
-    model = AppModel 0 defFileModel
+    model = AppModel 0 Nothing defFileModel
