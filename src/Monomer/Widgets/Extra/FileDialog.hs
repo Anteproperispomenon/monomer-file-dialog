@@ -1,8 +1,25 @@
+{-|
+Module      : Monomer.Widgets.Extra.FileDialog
+Copyright   : (c) 2025 David Wilson
+License     : BSD-3-Clause (see the LICENSE file)
+
+A widget for a file dialog, meant to be used when
+opening or saving a file. Note that it does not
+actually save or open a file, it merely returns
+a valid `System.OsPath.OsPath` that can then be
+opened or saved.
+
+-}
 
 module Monomer.Widgets.Extra.FileDialog
+  -- * Widgets
   ( fileDialog
+  -- * Model
   , FileDialogModel
   , defFileModel
+  , defFileModelOpen
+  , defFileModelSave
+  -- ** Operations
   , setOpen
   , setSave
   ) where
@@ -53,7 +70,21 @@ import Monomer.Core.StyleUtil
 
 import Monomer.Widgets.Containers.Popup
 
-fileDialog :: (CompositeEvent ep, CompParentModel sp) => (OsPath -> ep) -> ep -> ALens' sp FileDialogModel -> WidgetNode sp ep
+-- | The main widget creator for a file dialog. Note that
+--   you can use the same model for multiple different file
+--   dialogs, so long as only one dialog is active at a time.
+--   It's probably best to embed this either in a `popup` or
+--   a `zstack`.
+fileDialog 
+  :: (CompositeEvent ep, CompParentModel sp) 
+  -- | The parent event to be called with the working `OsPath`.
+  => (OsPath -> ep) 
+  -- | The parent event to call to close the FileDialog without opening/saving anything.
+  -> ep 
+  -- | The lens to `FileDialogModel` in the parent model.
+  -> ALens' sp FileDialogModel 
+  -- | The full widget.
+  -> WidgetNode sp ep
 fileDialog mkEvt cancelEvt modelLens
   = composite_
       "FileDialog"
@@ -111,7 +142,7 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
       )
     ]
   ConfirmOverwrite -> case (model ^. focusFile) of
-    Nothing    -> [Event ClosePopups, Event (ErrEvent ("No focus file listed."))]
+    Nothing    -> [ Event ClosePopups, Event (ErrEvent ("No focus file listed."))]
     (Just fil) -> [ Event ClosePopups, Report (mkEvent fil)]
   ClosePopups -> [Model (model & confVis .~ False & errVis .~ False)]
   NullEvent -> []
@@ -137,6 +168,8 @@ buildUI wenv model = {-makeLoader (model ^. isLoading) $-} keystroke_
          , button "Ref" Refresh
          -- , textField_ currentDir [readOnly]
          , label (showFilePath (model ^. currentDir))
+         , filler
+         , button "X" CancelDialog
          ]
       -- , label ("Error: " <> (model ^. fileError))
       -- , label (if (model ^. isLoading) then "Loading..." else "Loaded")

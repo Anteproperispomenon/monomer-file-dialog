@@ -41,6 +41,8 @@ dependencies:
 
 library:
   source-dirs: src
+  exposed-modules:
+    - Monomer.Widgets.Extra.FileDialog
   ghc-options:
   - -fwarn-incomplete-patterns
   - -threaded

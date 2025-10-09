@@ -19,11 +19,11 @@ extra-source-files:
 library
   exposed-modules:
       Monomer.Widgets.Extra.FileDialog
+  other-modules:
       Monomer.Widgets.Extra.FileDialog.Column
       Monomer.Widgets.Extra.FileDialog.Internal
       Monomer.Widgets.Extra.FileDialog.Model
       Monomer.Widgets.Extra.FileDialog.OS
-  other-modules:
       Paths_monomer_file_dialog
   hs-source-dirs:
       src

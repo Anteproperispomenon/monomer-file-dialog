@@ -1,5 +1,15 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
+{-|
+Module      : Monomer.Widgets.Extra.FileDialog.Column
+Copyright   : (c) 2025 David Wilson
+License     : BSD-3-Clause (see the LICENSE file)
+
+Internal types for working with monomer-hagrid's
+`Column` type.
+
+-}
+
 module Monomer.Widgets.Extra.FileDialog.Column
   ( sizeColumn
   , extnColumn

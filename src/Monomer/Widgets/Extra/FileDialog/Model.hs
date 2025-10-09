@@ -1,13 +1,22 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes #-}
 
+{-|
+Module      : Monomer.Widgets.Extra.FileDialog.Model
+Copyright   : (c) 2025 David Wilson
+License     : BSD-3-Clause (see the LICENSE file)
+
+Internal model and events for the file dialog.
+
+-}
+
 module Monomer.Widgets.Extra.FileDialog.Model
   ( FileDialogModel(..)
   , currentDir
   , backButton
   , fwdButton
   , dirFiles
-  , pathSelect
+  -- , pathSelect
   , dialogType
   , manualPath
   , focusFile
@@ -25,6 +34,8 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , setOpen
   , setSave
   , defFileModel
+  , defFileModelOpen
+  , defFileModelSave
   ) where
 
 import Data.Word
@@ -57,12 +68,20 @@ data DialogType
   | Save
   deriving (Show, Eq)
 
+-- | This is the model you need to add to your
+--   app's main model to use the file dialog.
+--   It is exported opaque, since you don't need
+--   to (and in fact should not) modify anything
+--   about the model yourself, aside from whether
+--   it's in Open mode or Save mode. To modify that,
+--   you can use `setOpen` and `setSave` together with
+--   the `(Control.Lens.Operators.%~)` operator.
 data FileDialogModel = FileDialogModel
   { _currentDir :: OsPath
   , _backButton :: Seq.Seq OsPath
   , _fwdButton  :: Seq.Seq OsPath
   , _dirFiles   :: Seq.Seq FileData
-  , _pathSelect :: T.Text
+  -- , _pathSelect :: T.Text
   , _dialogType :: DialogType
   , _maxBacklog :: Int
   , _manualPath :: T.Text -- Entered by user.
@@ -76,8 +95,19 @@ data FileDialogModel = FileDialogModel
 
 makeLenses 'FileDialogModel
 
+-- | The default file model to use.
+--   It defaults to working in "Open" mode.
 defFileModel :: FileDialogModel
 defFileModel = def
+
+-- | Synonym for `defFileModel`.
+defFileModelOpen :: FileDialogModel
+defFileModelOpen = defFileModel
+
+-- | The default file model to use when
+--   saving a file.
+defFileModelSave :: FileDialogModel
+defFileModelSave = defFileModel {_dialogType = Save}
 
 instance Default FileDialogModel where
   def = FileDialogModel
@@ -85,7 +115,7 @@ instance Default FileDialogModel where
     , _backButton = Empty
     , _fwdButton  = Empty
     , _dirFiles   = Empty
-    , _pathSelect = ""
+    -- , _pathSelect = ""
     , _dialogType = Open
     , _maxBacklog = 15
     , _manualPath = ""
@@ -109,7 +139,7 @@ setOpen model = model {_dialogType = Open}
 --   work in "Save File" mode. This will notify
 --   the user before returning files that already
 --   exist. You can use this with `(%~)` to change the 
---   value, e.g. @[Model (model & fdModel %~ setOpen)]@.
+--   value, e.g. @[Model (model & fdModel %~ setSave)]@.
 setSave :: FileDialogModel -> FileDialogModel
 setSave model = model {_dialogType = Save}
 
@@ -124,7 +154,7 @@ data FileDialogEvent
   | ChangeDirSafe OsPath -- Confirm that the dir IS a dir, then change.
   | Refresh -- Populate the dir with the "current" directory.
   | SetFiles Word16 [FileData]
-  | FileSelect
+  -- | FileSelect
   | SetupDialog -- set the current dir to the pwd
   | FocusFile OsPath
   | ErrEvent T.Text
