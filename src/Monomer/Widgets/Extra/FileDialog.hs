@@ -8,6 +8,7 @@ module Monomer.Widgets.Extra.FileDialog
   ) where
 
 import Monomer.Graphics.ColorTable
+import Monomer.Graphics.Util
 
 import Data.Proxy
 
@@ -15,11 +16,14 @@ import Control.Lens
 
 import Data.Sequence qualified as Seq
 
+import Data.Typeable
+
 import Monomer.Hagrid
 
 import Monomer.Widgets.Containers.Keystroke
 -- import Monomer.Widgets.Containers.SelectList 
 import Monomer.Widgets.Containers.Scroll
+import Monomer.Widgets.Containers.ZStack
 import Monomer.Widgets.Containers.Stack
 import Monomer.Widgets.Containers.Box
 import Monomer.Widgets.Composite
@@ -75,8 +79,12 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
   DirForward  -> let (newModel, doEvent) = goFwd  model in [Model newModel, Event doEvent]
   DirUp       -> let (newModel, doEvent) = goUp   model in [Model newModel, Event doEvent]
   SetupDialog -> [Task (SetDir <$> getCurrentDirectory)]
-  Refresh     -> [Task (SetFiles <$> getDirData' (model ^. currentDir)), scrollToTop (Proxy :: Proxy FileData) "FileDialogGrid"]
-  (SetFiles fils) -> [Model (model & dirFiles .~ (Seq.fromList fils))]
+  Refresh     -> 
+    [Task (SetFiles <$> getDirData' (model ^. currentDir))
+    , scrollToTop (Proxy :: Proxy FileData) "FileDialogGrid"
+    , Model (model & isLoading .~ True)
+    ]
+  (SetFiles fils) -> [Model (model & dirFiles .~ (Seq.fromList fils) & isLoading .~ False)]
   (SetDir drt)    -> [Model (model & currentDir .~ drt), Event Refresh]
   (ChangeDir drt) -> let (newModel, doEvent) = goDir drt model in [Model newModel, Event doEvent]
   (ChangeDirSafe drt) -> [Task $ goDirSafe drt]
@@ -109,12 +117,12 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
 -- type UIBuilder s e = WidgetEnv s e -> s -> WidgetNode s e
 
 buildUI :: WidgetEnv FileDialogModel FileDialogEvent -> FileDialogModel -> WidgetNode FileDialogModel FileDialogEvent
-buildUI wenv model = keystroke_ 
+buildUI wenv model = makeLoader (model ^. isLoading) $ keystroke_ 
   [ ("Esc", CancelDialog)
   , ("Alt-Left", DirBack)
   , ("Alt-Right", DirForward)
   , ("Alt-Up", DirUp)
-  , ("Enter" , NullEvent) -- Fix this
+  , ("Enter" , CheckFile) -- Fix this
   ]
   [ignoreChildrenEvts]
   $ vstack_ [childSpacing_ 3]
@@ -126,7 +134,8 @@ buildUI wenv model = keystroke_
          -- , textField_ currentDir [readOnly]
          , label (showFilePath (model ^. currentDir))
          ]
-      , label ("Error: " <> (model ^. fileError))
+      -- , label ("Error: " <> (model ^. fileError))
+      -- , label (if (model ^. isLoading) then "Loading..." else "Loaded")
       , popup errVis  (box errWidget `styleBasic` [border 3 black, radius 5, bgColor darkGray, padding 10])
       , popup confVis (box ovrWidget `styleBasic` [border 3 black, radius 5, bgColor darkGray, padding 10])
       , (hagrid_ [initialSort 0 SortAscending] [nameColumn, extnColumn, sizeColumn, dateColumn] (model ^. dirFiles))
@@ -262,4 +271,13 @@ saveFileT pwd txt = do
   , fdSize :: Maybe Integer
   , fdTime :: UTCTime
 -}
+
+makeLoader :: (Typeable s, WidgetEvent e) => Bool -> WidgetNode s e -> WidgetNode s e
+makeLoader False wnode = zstack [wnode]
+makeLoader True  wnode = zstack [wnode, newWidget]
+  where
+    newWidget 
+      = box 
+         (label "Loading..." `styleBasic` [textSize 20, textCenter])
+         `styleBasic` [bgColor (rgba 70 70 70 0.4)]
 

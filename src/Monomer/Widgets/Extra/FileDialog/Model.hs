@@ -14,6 +14,7 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , fileError
   , errVis
   , confVis
+  , isLoading
   , DialogType(..)
   , FileDialogEvent(..)
   , goBack
@@ -66,6 +67,7 @@ data FileDialogModel = FileDialogModel
   , _fileError  :: T.Text
   , _errVis     :: Bool
   , _confVis    :: Bool
+  , _isLoading  :: Bool
   } deriving (Show, Eq)
 
 makeLenses 'FileDialogModel
@@ -87,6 +89,7 @@ instance Default FileDialogModel where
     , _fileError  = ""
     , _errVis     = False
     , _confVis    = False
+    , _isLoading  = False
     }
 
 -- | Change the underlying `FileDialogModel` to
