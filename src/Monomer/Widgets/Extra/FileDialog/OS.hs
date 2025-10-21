@@ -1,12 +1,26 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE PackageImports #-}
 
 module Monomer.Widgets.Extra.FileDialog.OS
-  ( baseDir ) where
+  ( baseDir 
+  , isSingleWord
+  ) where
 
 -- Constant values that are OS-Specific
-import System.OsPath
-import System.OsString (osstr)
+import System.OsPath (OsPath)
+-- import "os-string" System.OsString 
+-- import "os-string" System.OsString qualified as OSS
+
+import Monomer.Widgets.Extra.FileDialog.OsString.Compat (OsString, OsChar, osstr, getOsChar)
+
+import Data.Word
+
+#if defined(mingw32_HOST_OS) || defined(__MINGW32__)
+import Monomer.Widgets.Extra.FileDialog.OsString.Compat (unWW)
+#else
+import Monomer.Widgets.Extra.FileDialog.OsString.Compat (unPW)
+#endif
 
 -- | Simple "root" path to be used as a default.
 --   On Windows, it becomes `C:\\`. Otherwise,
@@ -16,4 +30,15 @@ baseDir :: OsPath
 baseDir = [osstr|C:\|]
 #else
 baseDir = [osstr|/|]
+#endif
+
+-- | Check whether an `OsChar` is part of a 
+--   multi-word `Char` or not.
+isSingleWord :: OsChar -> Bool
+#if defined(mingw32_HOST_OS) || defined(__MINGW32__)
+isSingleWord c = cx <= 0xD7FF || cx >= 0xE000
+  where cx = unWW $ getOsChar c
+#else
+isSingleWord c = cx < 128
+  where cx = unPW $ getOsChar c
 #endif

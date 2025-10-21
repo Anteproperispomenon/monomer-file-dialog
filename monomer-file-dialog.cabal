@@ -22,9 +22,14 @@ library
       Monomer.Widgets.Extra.FileDialog.Helpers
   other-modules:
       Monomer.Widgets.Extra.FileDialog.Column
+      Monomer.Widgets.Extra.FileDialog.Filters
+      Monomer.Widgets.Extra.FileDialog.Filters.Internal
       Monomer.Widgets.Extra.FileDialog.Internal
       Monomer.Widgets.Extra.FileDialog.Model
       Monomer.Widgets.Extra.FileDialog.OS
+      Monomer.Widgets.Extra.FileDialog.OsString
+      Monomer.Widgets.Extra.FileDialog.OsString.Compat
+      Monomer.Widgets.Extra.FileDialog.OsString.Internal
       Paths_monomer_file_dialog
   hs-source-dirs:
       src
@@ -45,13 +50,15 @@ library
   ghc-options: -fwarn-incomplete-patterns -threaded
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , containers >=0.5.8
     , data-default
     , directory >=1.3.8
-    , filepath
+    , filepath >=1.4.300
     , lens
     , monomer
     , monomer-hagrid
+    , os-string
     , text
     , text-show
     , time
@@ -80,14 +87,16 @@ executable app
   ghc-options: -fwarn-incomplete-patterns -threaded
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , containers >=0.5.8
     , data-default
     , directory >=1.3.8
-    , filepath
+    , filepath >=1.4.300
     , lens
     , monomer
     , monomer-file-dialog
     , monomer-hagrid
+    , os-string
     , text
     , text-show
     , time

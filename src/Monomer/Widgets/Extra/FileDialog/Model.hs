@@ -62,7 +62,8 @@ import Control.Lens.TH
 
 import Data.Default
 
-import System.OsString (osstr)
+-- import System.OsString (osstr)
+import Monomer.Widgets.Extra.FileDialog.OsString.Compat (osstr)
 
 data DialogType
   = Open
