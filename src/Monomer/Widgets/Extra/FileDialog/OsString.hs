@@ -91,7 +91,7 @@ checkUncasedExtensionOf ext pth
   , Just rslt2 <- UO.unsnoc pth
   = checkUncasedExtensionOf' rslt1 rslt2
   | Nothing          <- UO.unsnoc ext
-  , Just (_rst, osC) <- UO.unsnoc ext
+  , Just (_rst, osC) <- UO.unsnoc pth
   = osC == _period
   | otherwise = False -- I guess?
 
