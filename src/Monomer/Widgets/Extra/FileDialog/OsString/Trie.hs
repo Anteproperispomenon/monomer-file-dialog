@@ -2,6 +2,7 @@ module Monomer.Widgets.Extra.FileDialog.OsString.Trie
   ( ExtTrie(..)
   , populateExtTrie
   , populateExtTrieFP
+  , anythingTrie
   ) where
 
 import Data.Trie.Set qualified as TS
@@ -26,6 +27,11 @@ import Data.ByteString.Short qualified as BSS
 --   if it matches one of the extensions. 
 newtype ExtTrie = ExtTrie { unwrapExtTrie :: TS.TSet OsChar } deriving (Eq)
 
+-- Note: might add another constructor that represents
+-- "*.*"/"All files" that just bypasses any checks.
+-- Or, just use an empty Trie to represent that. Or
+-- maybe TS.epsilon.
+
 -- Reverse the extensions as you show them.
 instance Show ExtTrie where
     show (ExtTrie tr) = "populateExtTrie " ++ show (mapMaybe (OSP.decodeUtf . OSP.pack . reverse) (TS.toList tr))
@@ -39,5 +45,9 @@ populateExtTrie strs = ExtTrie (TS.fromList $ map (reverse . OSP.unpack) strs)
 
 populateExtTrieFP :: [String] -> ExtTrie
 populateExtTrieFP strs = populateExtTrie (mapMaybe OSP.encodeUtf strs) 
+
+-- | The `ExtTrie` that accepts any file.
+anythingTrie :: ExtTrie
+anythingTrie = ExtTrie TS.empty
 
 

@@ -122,7 +122,9 @@ checkUncasedExtensionOf' (rst1, c1) (rst2, c2)
 
 -- | Check whether an `OsPath` has a certain extension.
 isOneUncasedExtensionOf :: ExtTrie -> OsPath -> Bool
-isOneUncasedExtensionOf exts pth = checkUncasedMultiExtOf (UO.UnsnocOsStringW pth) (unwrapExtTrie exts)
+isOneUncasedExtensionOf exts pth 
+  | (TS.null (unwrapExtTrie exts)) = True -- represents "*.*" 
+  | otherwise = checkUncasedMultiExtOf (UO.UnsnocOsStringW pth) (unwrapExtTrie exts)
 
 checkUncasedMultiExtOf :: UO.UnsnocOsString -> TS.TSet OsChar -> Bool
 checkUncasedMultiExtOf pth exts
@@ -149,5 +151,4 @@ isOneUncasedExtensionOfFP :: ExtTrie -> FilePath -> Bool
 isOneUncasedExtensionOfFP exts fp = case (encodeUtf fp) of
   Nothing     -> False
   (Just ostr) -> isOneUncasedExtensionOf exts ostr
-
 
