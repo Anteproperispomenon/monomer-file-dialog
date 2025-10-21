@@ -1,6 +1,18 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE PackageImports #-}
 
+{-|
+Module      : Monomer.Widgets.Extra.FileDialog.OsString.Compat
+Copyright   : (c) 2025 David Wilson
+License     : BSD-3-Clause (see the LICENSE file)
+
+Compatibility layer for versions of filepath that
+don't import os-string. For versions that do, it
+just re-exports the corresponding functions from
+"System.OsString".
+
+-}
+
 module Monomer.Widgets.Extra.FileDialog.OsString.Compat
   ( OsString
   , OsChar
@@ -20,6 +32,8 @@ module Monomer.Widgets.Extra.FileDialog.OsString.Compat
 
 import Prelude hiding (length, unsnoc, uncons, index, take, null)
 
+-- If using the version of filepath that
+-- imports from os-string.
 #if MIN_VERSION_filepath(1,5,0)
 import "os-string" System.OsString.Internal.Types 
   ( unWW
@@ -39,8 +53,20 @@ import "os-string" System.OsString (OsString, OsChar, osstr, unsnoc, uncons, ind
 import "os-string" System.OsString qualified as OSS
 import "os-string" System.OsString qualified as OS2
 import "os-string" System.OsString.Internal.Types qualified as OS2
+-- If using an older version of filepath.
 #else
-import "filepath" System.OsString.Internal.Types (unWW, unPW, getOsChar, getOsString, pattern WS, pattern PS, getWindowsString, getPosixString, pattern WW, pattern PW)
+import "filepath" System.OsString.Internal.Types 
+  ( unWW
+  , unPW
+  , getOsChar
+  , getOsString
+  , pattern WS
+  , pattern PS
+  , getWindowsString
+  , getPosixString
+  , pattern WW
+  , pattern PW
+  )
 import "filepath" System.OsString.Internal.Types qualified as OSS
 import "filepath" System.OsString (OsString, OsChar, osstr)
 import "filepath" System.OsString qualified as OSS
@@ -74,6 +100,12 @@ unsafeFromChar :: Char -> OSS.OsChar
 unsafeFromChar = coerce OS2.unsafeFromChar
 
 #endif
+
+-- Older type-specific versions of coerce. I didn't
+-- realise I was using coerce wrong, so I thought I
+-- had to manually coerce every value and back.
+-- Fortunately, I can just coerce the functions from
+-- os-string to work on types in the old filepath.
 
 coerceOS2 :: OSS.OsString -> OS2.OsString
 #if defined(mingw32_HOST_OS) || defined(__MINGW32__)

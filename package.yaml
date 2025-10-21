@@ -40,6 +40,7 @@ dependencies:
   - text
   - text-show
   - time
+  - trie-simple
 
 library:
   source-dirs: src

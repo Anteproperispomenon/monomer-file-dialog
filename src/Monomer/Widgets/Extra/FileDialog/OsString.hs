@@ -1,4 +1,4 @@
--- | You probably shouldn't use this module.
+-- | You might now want to use this module.
 -- 
 --   Unfortunately, after reading through the code for
 --   `OsString` etc, it seems they don't account for
@@ -19,6 +19,8 @@
 
 module Monomer.Widgets.Extra.FileDialog.OsString
   ( isUncasedExtensionOf
+  , isOneUncasedExtensionOf
+  , isOneUncasedExtensionOfFP
   -- , isSomeExtensionOf
   ) where
 
@@ -27,7 +29,7 @@ import Data.ByteString.Short qualified as BS
 -- import System.OsString qualified as OSS
 -- import System.OsString (OsString, OsChar)
 
-import System.OsPath (OsPath)
+import System.OsPath (OsPath, encodeUtf)
 
 import Monomer.Widgets.Extra.FileDialog.OsString.Compat qualified as OSS
 import Monomer.Widgets.Extra.FileDialog.OsString.Compat (OsString, OsChar)
@@ -39,7 +41,11 @@ import Data.List.NonEmpty (NonEmpty(..))
 
 import Monomer.Widgets.Extra.FileDialog.OsString.Internal qualified as UO
 
-import Monomer.Widgets.Extra.FileDialog.OS (isSingleWord)
+import Monomer.Widgets.Extra.FileDialog.OS (isSingleWord, toLowerOs)
+
+import Monomer.Widgets.Extra.FileDialog.OsString.Trie
+
+import Data.Trie.Set qualified as TS
 
 -- | Does the given filename have the specified extension?
 --   Ignores casing of the extension. Based on the code from
@@ -80,7 +86,7 @@ checkUncasedExtension ext1 ext2
 _period :: OsChar
 _period = OSS.unsafeFromChar '.'
 
--- | Check whether a string has an un
+-- | Check whether an `OsPath` has a certain extension.
 isUncasedExtensionOf :: OsString -> OsPath -> Bool
 isUncasedExtensionOf ext pth = checkUncasedExtensionOf (UO.UnsnocOsStringW ext) (UO.UnsnocOsStringW pth)
 -- {-# INLINE isUncasedExtensionOf #-}
@@ -109,10 +115,39 @@ checkUncasedExtensionOf' (rst1, c1) (rst2, c2)
   | cx1 == cx2 = checkUncasedExtensionOf rst1 rst2
   | otherwise = False
   where
-    -- These are only computed if you get to the third guard.
+    -- These are only computed if you get to the fourth guard.
     -- Thanks Laziness!
     cx1 = C.toLower $ OSS.toChar c1
     cx2 = C.toLower $ OSS.toChar c2
 
+-- | Check whether an `OsPath` has a certain extension.
+isOneUncasedExtensionOf :: ExtTrie -> OsPath -> Bool
+isOneUncasedExtensionOf exts pth = checkUncasedMultiExtOf (UO.UnsnocOsStringW pth) (unwrapExtTrie exts)
+
+checkUncasedMultiExtOf :: UO.UnsnocOsString -> TS.TSet OsChar -> Bool
+checkUncasedMultiExtOf pth exts
+  | Just rslt <- UO.unsnoc pth
+  = checkUncasedMultiExtOf' rslt exts
+  | otherwise
+  = False
+
+checkUncasedMultiExtOf' :: (UO.UnsnocOsString, OsChar) -> TS.TSet OsChar -> Bool
+checkUncasedMultiExtOf' pth@(newPth, lstChr) exts
+  | (TS.member [] exts) || (TS.member [_period] exts)
+  , lstChr == _period
+  = True
+  | newTrie <- TS.beginWith exts [toLowerOs lstChr]
+  , not (TS.null newTrie)
+  , Just newRslt <- UO.unsnoc newPth
+  = checkUncasedMultiExtOf' newRslt newTrie
+  | otherwise = False
+
+-- | Mostly for testing purposes.
+--   e.g.
+--   @filter (isOneUncasedExtensionOfFP (populateExtTrieFP [".jpg",".jpeg","png","bmp"])) ["asdf.PNG","zxcv.jpg","z.tif"]@
+isOneUncasedExtensionOfFP :: ExtTrie -> FilePath -> Bool
+isOneUncasedExtensionOfFP exts fp = case (encodeUtf fp) of
+  Nothing     -> False
+  (Just ostr) -> isOneUncasedExtensionOf exts ostr
 
 
