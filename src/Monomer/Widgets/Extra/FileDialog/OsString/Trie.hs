@@ -3,6 +3,8 @@ module Monomer.Widgets.Extra.FileDialog.OsString.Trie
   , populateExtTrie
   , populateExtTrieFP
   , anythingTrie
+  , isAnything
+  , getTrieTexts
   ) where
 
 import Data.Trie.Set qualified as TS
@@ -20,6 +22,8 @@ import Data.Maybe
 import Data.Coerce
 
 import Data.ByteString.Short qualified as BSS
+
+import Data.Text qualified as T
 
 -- | A trie containing a set of (backwards!) 
 --   extensions. These can then be used to
@@ -50,4 +54,8 @@ populateExtTrieFP strs = populateExtTrie (mapMaybe OSP.encodeUtf strs)
 anythingTrie :: ExtTrie
 anythingTrie = ExtTrie TS.empty
 
+isAnything :: ExtTrie -> Bool
+isAnything (ExtTrie tr) = TS.null tr
 
+getTrieTexts :: ExtTrie -> [T.Text]
+getTrieTexts (ExtTrie tr) = map T.pack (mapMaybe (OSP.decodeUtf . OSP.pack . reverse) (TS.toList tr))

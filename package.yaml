@@ -46,6 +46,8 @@ library:
   source-dirs: src
   exposed-modules:
     - Monomer.Widgets.Extra.FileDialog
+    - Monomer.Widgets.Extra.FileDialog.Filters
+    - Monomer.Widgets.Extra.FileDialog.Filters.Common
     - Monomer.Widgets.Extra.FileDialog.Helpers
   ghc-options:
   - -fwarn-incomplete-patterns

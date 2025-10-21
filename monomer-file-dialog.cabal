@@ -19,10 +19,11 @@ extra-source-files:
 library
   exposed-modules:
       Monomer.Widgets.Extra.FileDialog
+      Monomer.Widgets.Extra.FileDialog.Filters
+      Monomer.Widgets.Extra.FileDialog.Filters.Common
       Monomer.Widgets.Extra.FileDialog.Helpers
   other-modules:
       Monomer.Widgets.Extra.FileDialog.Column
-      Monomer.Widgets.Extra.FileDialog.Filters
       Monomer.Widgets.Extra.FileDialog.Filters.Internal
       Monomer.Widgets.Extra.FileDialog.Internal
       Monomer.Widgets.Extra.FileDialog.Model

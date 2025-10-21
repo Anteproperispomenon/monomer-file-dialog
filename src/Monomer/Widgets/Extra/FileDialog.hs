@@ -22,6 +22,9 @@ module Monomer.Widgets.Extra.FileDialog
   -- ** Operations
   , setOpen
   , setSave
+  , turnOnFilter
+  , turnOffFilter
+  , changeFilters
   ) where
 
 import Monomer.Graphics.ColorTable
@@ -45,6 +48,7 @@ import Monomer.Widgets.Containers.Stack
 import Monomer.Widgets.Containers.Box
 import Monomer.Widgets.Composite
 
+import Monomer.Widgets.Singles.TextDropdown
 import Monomer.Widgets.Singles.Button
 import Monomer.Widgets.Singles.Label
 import Monomer.Widgets.Singles.Spacer
@@ -69,6 +73,8 @@ import Monomer.Widgets.Extra.FileDialog.Column
 import Monomer.Core.StyleUtil
 
 import Monomer.Widgets.Containers.Popup
+
+import Monomer.Widgets.Extra.FileDialog.Filters.Internal
 
 -- | The main widget creator for a file dialog. Note that
 --   you can use the same model for multiple different file
@@ -186,6 +192,9 @@ buildUI wenv model = {-makeLoader (model ^. isLoading) $-} keystroke_
         , button (T.pack $ show (_dialogType model)) CheckFile
     
         ]
+      , if (model ^. isFiltered)
+          then (textDropdown_ curFilter (model ^. filterList) showExtensions [onChange mkFiltChange])
+          else vstack [] -- I guess?
   ]
   where
     errWidget = vstack_ [childSpacing_ 8]
@@ -206,8 +215,9 @@ buildUI wenv model = {-makeLoader (model ^. isLoading) $-} keystroke_
         , button "Cancel" ClosePopups
         , mainButton "Save" ConfirmOverwrite
         ]
-
       ]
+    mkSelectItem fd = label (showExtensions fd)
+    mkFiltChange (FilterData _ extTrie) = FilterChanged extTrie
 
 -- | Check that a directory exists before
 --   changing to it.

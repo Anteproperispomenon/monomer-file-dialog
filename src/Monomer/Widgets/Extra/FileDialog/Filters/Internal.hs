@@ -2,13 +2,21 @@
 module Monomer.Widgets.Extra.FileDialog.Filters.Internal
   ( FileFormat(..)
   , FileKind(..)
+  , FilterData(..)
   , kindToTrie
+  , makeFilterData
+  , makeFilterData'
+  , allFiles
+  , showExtensions
   ) where
 
 import System.OsPath
 import System.Directory.OsPath
 
+import Data.Maybe
+
 import Data.Text qualified as T
+-- import Data.Text (pattern (:<), pattern (:>))
 
 import Data.List.NonEmpty qualified as NE
 import Data.List.NonEmpty (NonEmpty(..))
@@ -80,3 +88,34 @@ makeFilterData'    (FileKind nom (fmt :| []))
 makeFilterData' fk@(FileKind nom fmts)
   = (FilterData nom (kindToTrie fk)) : (map (\ff@(FileFormat _ nom) -> FilterData nom (fmtToTrie ff)) (NE.toList fmts))
 
+-- | Create a list of filters from a list
+--   of `FileKind`s. It always includes an
+--   'All Files' filter at the end.
+makeFilterData :: [FileKind] -> [FilterData]
+makeFilterData [] = [allFiles]
+makeFilterData flts = (concatMap makeFilterData' flts) ++ [allFiles]
+
+-- | `NonEmpty`-version of `makeFilterData`,
+--   if you want it, for whatever reason.
+makeFilterDataNE :: [FileKind] -> NonEmpty FilterData
+makeFilterDataNE [] = allFiles :| []
+makeFilterDataNE flts = (concatMap makeFilterData' flts) `NE.prependList` (allFiles :| [])
+
+showExtensions :: FilterData -> T.Text
+showExtensions (FilterData txt exts)
+  | isAnything exts = txt <> " (*.*)" 
+  | otherwise = txt <> " (" <> exts' <> ")"
+  where
+    exts' = T.intercalate ";" (mapMaybe addDotAndStar $ getTrieTexts exts)
+
+-- | Add a dot to an extension if missing.
+addDotAndStar :: T.Text -> Maybe T.Text
+-- Too new for this project...
+-- addDotAndStar txt@('.':<_) = Just ('*' :< txt)
+-- addDotAndStar T.Empty = Nothing
+addDotAndStar txt
+  | Just ('.', _) <- T.uncons txt
+  = Just ('*' `T.cons` txt)
+  | T.null txt = Nothing
+  | otherwise = Just ("*." <> txt)
+-- addDotAndStar txt = "*." <> txt
