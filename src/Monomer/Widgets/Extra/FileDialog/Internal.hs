@@ -12,12 +12,16 @@ module Monomer.Widgets.Extra.FileDialog.Internal
   , PathKind(..)
   , getDirData
   , getDirData'
+  , getDirDataF
+  , getDirDataF'
   , showSize
   , getExtn
   , getFileSizeT
   , getFileTime
   , showFilePath
   ) where
+
+import Data.Maybe
 
 import System.Directory.OsPath
 
@@ -34,6 +38,11 @@ import TextShow.Data.Floating
 
 import Data.Time.Clock
 import Data.Time.Format
+
+import Monomer.Widgets.Extra.FileDialog.Filters.Internal
+import Monomer.Widgets.Extra.FileDialog.OsString.Trie (ExtTrie)
+
+import Monomer.Widgets.Extra.FileDialog.OsString
 
 data FileData = FileData
   { fdName :: OsPath
@@ -68,9 +77,29 @@ getDirData pth = do
       | (hasExtension pt) = Just (takeExtension pt)
       | otherwise         = Nothing
 
+-- | Variant of `getDirData` that filters
+--   the files.
+getDirDataF :: OsPath -> Maybe ExtTrie -> IO ([FileData],[FileData])
+getDirDataF pth Nothing = getDirData pth
+getDirDataF pth (Just filtTr) = do
+  pths <- map (pth </>) <$> listDirectory pth
+  dirs <- filterM doesDirectoryExist pths
+  fils <- filterM doesFileExist pths
+  fils' <- return $ mapMaybe (isOneUncasedExtensionOfM True filtTr) fils
+  dirs2 <- mapM (\ fp      -> FileData (takeFileName fp) fp Nothing    PathDir      Nothing         <$> getModificationTime fp) dirs
+  fils2 <- mapM (\(fp,ext) -> FileData (takeFileName fp) fp (Just ext) PathFile <$> getFileSize' fp <*> getModificationTime fp) fils'
+  return (dirs2, fils2)
+
 getDirData' :: OsPath -> IO [FileData]
 getDirData' pth = do
   (dirs, files) <- getDirData pth
+  return (dirs ++ files)
+
+-- | Variant of `getDirData'` that filters
+--   the files.
+getDirDataF' :: OsPath -> Maybe ExtTrie -> IO [FileData]
+getDirDataF' pth filt = do
+  (dirs, files) <- getDirDataF pth filt
   return (dirs ++ files)
 
 getFileSize' :: OsPath -> IO (Maybe Integer)

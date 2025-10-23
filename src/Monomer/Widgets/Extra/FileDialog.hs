@@ -74,6 +74,7 @@ import Monomer.Core.StyleUtil
 
 import Monomer.Widgets.Containers.Popup
 
+import Monomer.Widgets.Extra.FileDialog.Filters
 import Monomer.Widgets.Extra.FileDialog.Filters.Internal
 
 -- | The main widget creator for a file dialog. Note that
@@ -120,7 +121,7 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
       then []
       else [Task (SetDir <$> getCurrentDirectory), Model (model & isSetup .~ True)]
   Refresh     -> let newCount = (model ^. dirCount) + 1 in
-    [Task (SetFiles newCount <$> getDirData' (model ^. currentDir))
+    [Task (SetFiles newCount <$> getDirDataF' (model ^. currentDir) theFilter)
     , scrollToTop (Proxy :: Proxy FileData) "FileDialogGrid"
     , Model (model & isLoading .~ True & dirCount .~ newCount)
     ]
@@ -157,6 +158,11 @@ handleEvent mkEvent cancelEvt wenv wnode model evt = case evt of
   NullEvent -> []
   (ErrEvent err) -> [Model (model & fileError .~ err & errVis .~ True)]
   _ -> []
+  where
+    theFilter :: Maybe ExtTrie
+    theFilter
+      | _isFiltered model = Just (fltTrie $ _curFilter model)
+      | otherwise         = Nothing
 
 -- type UIBuilder s e = WidgetEnv s e -> s -> WidgetNode s e
 
@@ -217,7 +223,12 @@ buildUI wenv model = {-makeLoader (model ^. isLoading) $-} keystroke_
         ]
       ]
     mkSelectItem fd = label (showExtensions fd)
-    mkFiltChange (FilterData _ extTrie) = FilterChanged extTrie
+    -- What to send when changing filter.
+    -- mkFiltChange (FilterData _ extTrie) = FilterChanged extTrie
+    mkFiltChange (FilterData _ _) = Refresh -- ?
+    -- If filters are on, return the filter, otherwise return nothing.
+
+
 
 -- | Check that a directory exists before
 --   changing to it.

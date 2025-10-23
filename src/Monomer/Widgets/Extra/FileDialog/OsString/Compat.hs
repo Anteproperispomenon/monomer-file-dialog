@@ -28,6 +28,8 @@ module Monomer.Widgets.Extra.FileDialog.OsString.Compat
   , osstr
   , toChar
   , unsafeFromChar
+  , pack
+  , unpack
   ) where
 
 import Prelude hiding (length, unsnoc, uncons, index, take, null)
@@ -49,7 +51,7 @@ import "os-string" System.OsString.Internal.Types
   , toChar
   , unsafeFromChar
   )
-import "os-string" System.OsString (OsString, OsChar, osstr, unsnoc, uncons, indexMaybe, length, null, take, osstr)
+import "os-string" System.OsString (OsString, OsChar, osstr, unsnoc, uncons, indexMaybe, length, null, take, osstr, pack, unpack)
 import "os-string" System.OsString qualified as OSS
 import "os-string" System.OsString qualified as OS2
 import "os-string" System.OsString.Internal.Types qualified as OS2
@@ -68,7 +70,7 @@ import "filepath" System.OsString.Internal.Types
   , pattern PW
   )
 import "filepath" System.OsString.Internal.Types qualified as OSS
-import "filepath" System.OsString (OsString, OsChar, osstr)
+import "filepath" System.OsString (OsString, OsChar, osstr, pack, unpack)
 import "filepath" System.OsString qualified as OSS
 import "os-string" System.OsString qualified as OS2
 import "os-string" System.OsString.Internal.Types qualified as OS2

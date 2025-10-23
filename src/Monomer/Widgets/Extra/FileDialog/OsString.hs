@@ -20,6 +20,7 @@
 module Monomer.Widgets.Extra.FileDialog.OsString
   ( isUncasedExtensionOf
   , isOneUncasedExtensionOf
+  , isOneUncasedExtensionOfM
   , isOneUncasedExtensionOfFP
   -- , isSomeExtensionOf
   ) where
@@ -29,7 +30,7 @@ import Data.ByteString.Short qualified as BS
 -- import System.OsString qualified as OSS
 -- import System.OsString (OsString, OsChar)
 
-import System.OsPath (OsPath, encodeUtf)
+import System.OsPath (OsPath, encodeUtf, takeExtension)
 
 import Monomer.Widgets.Extra.FileDialog.OsString.Compat qualified as OSS
 import Monomer.Widgets.Extra.FileDialog.OsString.Compat (OsString, OsChar)
@@ -151,4 +152,34 @@ isOneUncasedExtensionOfFP :: ExtTrie -> FilePath -> Bool
 isOneUncasedExtensionOfFP exts fp = case (encodeUtf fp) of
   Nothing     -> False
   (Just ostr) -> isOneUncasedExtensionOf exts ostr
+
+
+-- | Check whether an `OsPath` has a certain extension,
+--   and return the exact extension it has, along
+--   with the original filepath.
+isOneUncasedExtensionOfM :: Bool -> ExtTrie -> OsPath -> Maybe (OsPath, OsString)
+isOneUncasedExtensionOfM incDot exts pth 
+  | (TS.null (unwrapExtTrie exts)) = Just (pth, takeExtension pth)
+  | otherwise = (pth,) <$> (checkUncasedMultiExtOfM [] incDot (UO.UnsnocOsStringW pth) (unwrapExtTrie exts))
+
+-- | Like `checkUncasedMultiExtOf, but returns
+--   `Nothing` instead of `False`, and @Just extn@
+--   instead of `True`.
+checkUncasedMultiExtOfM :: [OsChar] -> Bool -> UO.UnsnocOsString -> TS.TSet OsChar -> Maybe OsString
+checkUncasedMultiExtOfM acc incDot pth exts
+  | Just rslt <- UO.unsnoc pth
+  = checkUncasedMultiExtOfM' acc incDot rslt exts
+  | otherwise
+  = Nothing
+
+checkUncasedMultiExtOfM' :: [OsChar] -> Bool -> (UO.UnsnocOsString, OsChar) -> TS.TSet OsChar -> Maybe OsString
+checkUncasedMultiExtOfM' acc incDot pth@(newPth, lstChr) exts
+  | (TS.member [] exts) || (TS.member [_period] exts)
+  , lstChr == _period
+  =  if incDot then Just (OSS.pack (_period:acc)) else Just (OSS.pack acc)
+  | newTrie <- TS.beginWith exts [toLowerOs lstChr]
+  , not (TS.null newTrie)
+  , Just newRslt <- UO.unsnoc newPth
+  = checkUncasedMultiExtOfM' (lstChr:acc) incDot newRslt newTrie
+  | otherwise = Nothing
 

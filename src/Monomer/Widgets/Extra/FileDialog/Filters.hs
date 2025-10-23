@@ -12,6 +12,7 @@ module Monomer.Widgets.Extra.FileDialog.Filters
   ( FileFormat(..)
   , FileKind(..)
   , FilterData(..)
+  , ExtTrie
   -- , kindToTrie
   , makeFilterData
   -- , makeFilterData'
@@ -20,3 +21,4 @@ module Monomer.Widgets.Extra.FileDialog.Filters
   ) where
 
 import Monomer.Widgets.Extra.FileDialog.Filters.Internal
+import Monomer.Widgets.Extra.FileDialog.OsString.Trie
