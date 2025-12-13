@@ -12,8 +12,9 @@ import Data.Trie.Set qualified as TS
 import System.OsPath (OsPath)
 import System.OsPath qualified as OSP
 
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat (OsString, OsChar)
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat qualified as OSS
+
+import System.OsString.Compat qualified as OSS
+import System.OsString.Compat (OsString, OsChar)
 
 import Monomer.Widgets.Extra.FileDialog.OS (toLowerOs)
 

@@ -32,8 +32,8 @@ import Data.ByteString.Short qualified as BS
 
 import System.OsPath (OsPath, encodeUtf, takeExtension)
 
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat qualified as OSS
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat (OsString, OsChar)
+import System.OsString.Compat qualified as OSS
+import System.OsString.Compat (OsString, OsChar)
 
 import Data.Char qualified as C
 

@@ -17,7 +17,7 @@ module Monomer.Widgets.Extra.FileDialog.Filters.Common
 
   ) where
 
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat (osstr)
+import System.OsString.Compat (osstr)
 
 import Monomer.Widgets.Extra.FileDialog.Filters.Internal
 

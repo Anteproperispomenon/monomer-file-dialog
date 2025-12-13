@@ -26,6 +26,13 @@ packages:
   original:
     hackage: monomer-hagrid-0.4.0.1
 - completed:
+    hackage: os-string-compat-1.0.1@sha256:a7d0d8093bae02fdc7eb0db3b67189db602b295e8d2ef5fcfc109dbd35443e0e,5296
+    pantry-tree:
+      sha256: d13c9c08d2ca93da2ed407a1c19cfa20acd4fff6f444ee5a927d23fa57fd11c0
+      size: 2044
+  original:
+    hackage: os-string-compat-1.0.1
+- completed:
     hackage: sdl2-2.5.5.1@sha256:7e2c55ca0ec4b538351fd3cceb71dbc5f99893dd326a7db78efa4adecc43c086,12150
     pantry-tree:
       sha256: 3623c5ef3144fa52f5db1599c3cfb0067840ba141d3516a8d750ed119476158f

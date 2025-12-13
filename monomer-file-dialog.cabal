@@ -61,6 +61,7 @@ library
     , monomer
     , monomer-hagrid
     , os-string
+    , os-string-compat
     , text
     , text-show
     , time
@@ -100,6 +101,7 @@ executable app
     , monomer-file-dialog
     , monomer-hagrid
     , os-string
+    , os-string-compat
     , text
     , text-show
     , time

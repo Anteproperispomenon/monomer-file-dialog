@@ -13,16 +13,16 @@ import System.OsPath (OsPath)
 -- import "os-string" System.OsString 
 -- import "os-string" System.OsString qualified as OSS
 
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat (OsString, OsChar, osstr, getOsChar, toChar, unsafeFromChar)
+import System.OsString.Compat (OsString, OsChar, osstr, toChar, unsafeFromChar)
 
 import Data.Word
 
 import Data.Char qualified as C
 
 #if defined(mingw32_HOST_OS) || defined(__MINGW32__)
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat (unWW)
+import System.OsString.Internal.Types.Compat (unWW, getOsChar)
 #else
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat (unPW)
+import System.OsString.Internal.Types.Compat (unPW, getOsChar)
 #endif
 
 -- | Simple "root" path to be used as a default.

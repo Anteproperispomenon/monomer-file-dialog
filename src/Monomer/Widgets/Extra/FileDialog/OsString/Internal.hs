@@ -12,8 +12,8 @@ import Prelude hiding (null, unsnoc)
 -- import "os-string" System.OsString qualified as OSS
 -- import "os-string" System.OsString (OsString, OsChar)
 
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat qualified as OSS
-import Monomer.Widgets.Extra.FileDialog.OsString.Compat (OsString, OsChar)
+import System.OsString.Compat qualified as OSS
+import System.OsString.Compat (OsString, OsChar)
 
 -- | A wrapper over @(`OsString`, `Int`)@ to
 --   effectively allow `OSS.unsnoc` without

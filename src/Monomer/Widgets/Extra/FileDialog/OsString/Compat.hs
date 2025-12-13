@@ -11,9 +11,11 @@ don't import os-string. For versions that do, it
 just re-exports the corresponding functions from
 "System.OsString".
 
+This module later made redundant by os-string-compat.
+
 -}
 
-module Monomer.Widgets.Extra.FileDialog.OsString.Compat
+module Monomer.Widgets.Extra.FileDialog.OsString.Compat {-# DEPRECATED "Use System.OsString.Compat instead" #-}
   ( OsString
   , OsChar
   , unsnoc

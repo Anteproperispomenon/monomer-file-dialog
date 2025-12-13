@@ -37,6 +37,7 @@ dependencies:
   - monomer
   - monomer-hagrid
   - os-string
+  - os-string-compat
   - text
   - text-show
   - time
