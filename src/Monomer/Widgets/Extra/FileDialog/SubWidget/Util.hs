@@ -20,6 +20,7 @@ module Monomer.Widgets.Extra.FileDialog.SubWidget.Util
   , CubicBezierSpline(..)
   , cubicBezSteps
   , cubicBezSpline
+  , eqRadius
   ) where
 
 import Control.Applicative ((<|>))
@@ -184,6 +185,9 @@ runDrawStep rend sst vp lwdth stp = case stp of
     rpCol Nothing  = case (_sstFgColor sst) of
       Nothing  -> Just (rgb 0 0 0)
       mcol     -> mcol
+    -- rszRad :: Maybe Radius -> Maybe Radius
+    -- rszRad Nothing = Nothing
+    -- rszRad ()
 
 runDrawSteps :: Renderer -> StyleState -> Rect -> Double -> [DrawStep] -> IO ()
 runDrawSteps rend sst vp lw = foldr (\x rst -> runDrawStep rend sst vp lw x >> rst) (return ())
@@ -309,4 +313,10 @@ resizePathRun (PathRun pt1 stps wd mcol) vp lineWidth
     go ((PathQuadTo ct pt)   :rst) = (PathQuadTo (rszPt ct) (rszPt pt)) : go rst
     go ((PathBezTo  c1 c2 pt):rst) = (PathBezTo  (rszPt c1) (rszPt c2) (rszPt pt)) : go rst
 
-
+-- | Use the same radius for each corner.
+eqRadius :: Double -> Radius
+eqRadius rd = Radius
+  (Just (RadiusCorner rd))
+  (Just (RadiusCorner rd))
+  (Just (RadiusCorner rd))
+  (Just (RadiusCorner rd))

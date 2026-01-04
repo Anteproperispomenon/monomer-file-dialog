@@ -51,11 +51,14 @@ import Monomer.Widgets.Composite
 import Monomer.Widgets.Singles.TextDropdown
 import Monomer.Widgets.Singles.Button
 import Monomer.Widgets.Singles.Label
+import Monomer.Widgets.Singles.Icon
 import Monomer.Widgets.Singles.Spacer
 import Monomer.Widgets.Singles.TextField
 
 import Monomer.Widgets.Extra.FileDialog.Internal
 import Monomer.Widgets.Extra.FileDialog.Model
+
+import Monomer.Widgets.Extra.FileDialog.SubWidget.ExtIcon
 
 import System.OsPath
 
@@ -100,6 +103,7 @@ fileDialog mkEvt cancelEvt modelLens
       (handleEvent mkEvt cancelEvt)
       [onInit SetupDialog]
 
+-- Monomer.Widgets.Extra.FileDialog.SubWidget.ExtIcon
 
 
 -- type EventHandler s e sp ep = WidgetEnv s e -> WidgetNode s e -> s -> e -> [EventResponse s e sp ep]
@@ -184,6 +188,8 @@ buildUI wenv model = {-makeLoader (model ^. isLoading) $-} keystroke_
          -- , textField_ currentDir [readOnly]
          , label (showFilePath (model ^. currentDir))
          , filler
+         -- , extIcon squareIcon "Sqaure"
+         -- , icon IconPlus
          , button "X" CancelDialog
          ]
       -- , label ("Error: " <> (model ^. fileError))

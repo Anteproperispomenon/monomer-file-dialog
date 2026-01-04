@@ -15,11 +15,14 @@ icon IconPlus
 
 module Monomer.Widgets.Extra.FileDialog.SubWidget.ExtIcon (
   -- * Configuration
-  ExtIconCfg,
-  IconBlueprint,
+    ExtIconCfg
+  , IconBlueprint
   -- * Constructors
-  extIcon,
-  extIcon_
+  , extIcon
+  , extIcon_
+  -- * Example Blueprints
+  , squareIcon
+  , roundSquareIcon
 ) where
 
 import Control.Lens ((^.))
@@ -150,3 +153,14 @@ drawIcon renderer style iconType viewport lw = runDrawSteps renderer style viewp
     mx = x + w
     my = y + h
 -}
+
+-- ExampleIcons
+
+squareIcon :: IconBlueprint
+squareIcon = [DrawRect (Rect 0 0 1 1) Nothing Nothing]
+
+roundSquareIcon :: IconBlueprint
+roundSquareIcon = [DrawRect (Rect 0 0 1 1) Nothing (Just (eqRadius 3))]
+
+
+
