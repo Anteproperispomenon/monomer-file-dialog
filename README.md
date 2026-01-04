@@ -19,7 +19,7 @@ your project. However, you'll have to change a few things in `stack.yaml` to get
 
 * After `resolver:`, change `lts-22.4` to `lts-23.28`. You might be able to use other revisions, but that's the version I'm using.
 * In `extra-deps`, change `monomer-1.6.0.0` to `monomer-1.6.0.1`. This seems to fix some package compatibility issues.
-* Also in `extra-deps`, add `monomer-hagrid-0.4.0.1` and `sdl2-2.5.5.1`. 
+* Also in `extra-deps`, add `monomer-hagrid-0.4.0.1`, `sdl2-2.5.5.1`, and `os-string-compat-1.0.1`. 
 * Finally, add `git: https://github.com/Anteproperispomenon/monomer-file-dialog` followed by `commit: ...`, where the `...` is replaced by the latest commit of `monomer-file-dialog`.
 
 In the end, your `extra-deps` should look like this:
@@ -28,11 +28,12 @@ In the end, your `extra-deps` should look like this:
 extra-deps:
 - nanovg-0.8.1.0
 - monomer-1.6.0.1
+- os-string-compat-1.0.1
 - trie-simple-0.4.4
 - sdl2-2.5.5.1
 - monomer-hagrid-0.4.0.1
 - git: https://github.com/Anteproperispomenon/monomer-file-dialog
-  commit: 4adf1ef5c9b8b0020773daa37da9a4ac3f8f63fd
+  commit: ec1820563de4216c8747531a4666c5ab6e480610
 ```
 
 After that, you can follow the other `monomer` tutorials to get
