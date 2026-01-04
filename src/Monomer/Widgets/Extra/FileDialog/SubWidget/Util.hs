@@ -14,6 +14,12 @@ module Monomer.Widgets.Extra.FileDialog.SubWidget.Util
   ( DrawStep(..)
   , runDrawStep
   , runDrawSteps
+  , PathRun(..)
+  , PathPart(..)
+  , CubicBezierSteps(..)
+  , CubicBezierSpline(..)
+  , cubicBezSteps
+  , cubicBezSpline
   ) where
 
 import Control.Applicative ((<|>))
