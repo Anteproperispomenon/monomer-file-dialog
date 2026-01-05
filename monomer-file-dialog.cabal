@@ -33,6 +33,7 @@ library
       Monomer.Widgets.Extra.FileDialog.OsString.Internal
       Monomer.Widgets.Extra.FileDialog.OsString.Trie
       Monomer.Widgets.Extra.FileDialog.SubWidget.ExtIcon
+      Monomer.Widgets.Extra.FileDialog.SubWidget.ImageButton
       Monomer.Widgets.Extra.FileDialog.SubWidget.Util
       Paths_monomer_file_dialog
   hs-source-dirs:

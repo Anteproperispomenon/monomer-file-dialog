@@ -23,6 +23,7 @@ module Monomer.Widgets.Extra.FileDialog.SubWidget.ExtIcon (
   -- * Example Blueprints
   , squareIcon
   , roundSquareIcon
+  , crossIcon
 ) where
 
 import Control.Lens ((^.))
@@ -43,7 +44,10 @@ import Monomer.Widgets.Extra.FileDialog.SubWidget.Util
 -- | A simple type synoynm to describe
 --   a vector image to be drawn, since
 --   I'm not sure which type to use yet.
-type IconBlueprint = [DrawStep]
+data IconBlueprint = IconBlueprint
+  { ibpName :: T.Text
+  , ibpData :: [DrawStep]
+  } deriving (Show, Eq)
 
 -- | Different types of icons that can be displayed.
 -- data IconType
@@ -82,23 +86,23 @@ instance CmbWidth ExtIconCfg where
 -- | Creates an icon of the given type.
 extIcon
   :: IconBlueprint  -- ^ The icon type.
-  -> T.Text          -- ^ A one-word description of the icon
+  -- -> T.Text          -- ^ A one-word description of the icon
   -> WidgetNode s e  -- ^ The created icon.
-extIcon iconType iconName = extIcon_ iconType iconName def
+extIcon iconType {- iconName -} = extIcon_ iconType def
 
 -- | Creates an icon of the given type. Accepts config.
 extIcon_
   :: IconBlueprint  -- ^ The icon type.
-  -> T.Text          -- ^ A one-word description of the icon
+  -- -> T.Text          -- ^ A one-word description of the icon
   -> [ExtIconCfg]       -- ^ The config options.
   -> WidgetNode s e  -- ^ The created icon.
-extIcon_ iconType iconName configs = defaultWidgetNode widgetType widget where
+extIcon_ iconType {-iconName-} configs = defaultWidgetNode widgetType widget where
   -- iconName = T.pack $ show iconType
-  widgetType = WidgetType ("icon" <> iconName)
+  widgetType = WidgetType ("icon" <> ibpName iconType)
   config = mconcat configs
-  widget = makeImage iconType config
+  widget = makeImage (ibpData iconType) config
 
-makeImage :: IconBlueprint -> ExtIconCfg -> Widget s e
+makeImage :: [DrawStep] -> ExtIconCfg -> Widget s e
 makeImage iconType config = widget where
   widget = createSingle () def {
     singleGetSizeReq = getSizeReq,
@@ -126,7 +130,7 @@ centeredSquare (Rect x y w h) = Rect newX newY dim dim where
   newX = x + (w - dim) / 2
   newY = y + (h - dim) / 2
 
-drawIcon :: Renderer -> StyleState -> IconBlueprint -> Rect -> Double -> IO ()
+drawIcon :: Renderer -> StyleState -> [DrawStep] -> Rect -> Double -> IO ()
 drawIcon renderer style iconType viewport lw = runDrawSteps renderer style viewport lw iconType
 {-
   IconClose ->
@@ -157,10 +161,20 @@ drawIcon renderer style iconType viewport lw = runDrawSteps renderer style viewp
 -- ExampleIcons
 
 squareIcon :: IconBlueprint
-squareIcon = [DrawRect (Rect 0 0 1 1) Nothing Nothing]
+squareIcon = IconBlueprint
+  "Square"
+  [DrawRect (Rect 0 0 1 1) Nothing Nothing]
 
 roundSquareIcon :: IconBlueprint
-roundSquareIcon = [DrawRect (Rect 0 0 1 1) Nothing (Just (eqRadius 3))]
+roundSquareIcon = IconBlueprint
+  "RoundedSquare"
+  [DrawRect (Rect 0.1 0.1 0.9 0.9) Nothing (Just (eqRadius 3))]
 
+crossIcon :: IconBlueprint
+crossIcon = IconBlueprint
+  "Cross"
+  [ DrawLine (Point 0.2 0.2) (Point 0.8 0.8) Nothing
+  , DrawLine (Point 0.2 0.8) (Point 0.8 0.2) Nothing
+  ]
 
 

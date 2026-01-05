@@ -80,6 +80,8 @@ import Monomer.Widgets.Containers.Popup
 import Monomer.Widgets.Extra.FileDialog.Filters
 import Monomer.Widgets.Extra.FileDialog.Filters.Internal
 
+import Monomer.Widgets.Extra.FileDialog.SubWidget.ImageButton
+
 -- | The main widget creator for a file dialog. Note that
 --   you can use the same model for multiple different file
 --   dialogs, so long as only one dialog is active at a time.
@@ -188,9 +190,10 @@ buildUI wenv model = {-makeLoader (model ^. isLoading) $-} keystroke_
          -- , textField_ currentDir [readOnly]
          , label (showFilePath (model ^. currentDir))
          , filler
-         -- , extIcon squareIcon "Sqaure"
+         -- , extIcon roundSquareIcon "RoundSqaure"
          -- , icon IconPlus
          , button "X" CancelDialog
+         -- , imgButton crossIcon CancelDialog
          ]
       -- , label ("Error: " <> (model ^. fileError))
       -- , label (if (model ^. isLoading) then "Loading..." else "Loaded")
