@@ -9,6 +9,21 @@ actually save or open a file, it merely returns
 a valid `System.OsPath.OsPath` that can then be
 opened or saved.
 
+In order for some of the symbols in this widget to
+work, you'll need to have the "remixicon.ttf" file
+in your assets folder. Then, add the following line 
+to your app init code:
+
+@
+appFontDef "Remix" "./assets/fonts/remixicon.ttf"
+@
+
+Also, make sure you are using the latest version
+of remixicon.ttf; you can find it at 
+<https://remixicon.com/>. Click the download icon
+in the top-right corner, and then click on the
+download icon for "Icon fonts".
+
 -}
 
 module Monomer.Widgets.Extra.FileDialog
@@ -81,6 +96,8 @@ import Monomer.Widgets.Extra.FileDialog.Filters
 import Monomer.Widgets.Extra.FileDialog.Filters.Internal
 
 import Monomer.Widgets.Extra.FileDialog.SubWidget.ImageButton
+
+import Monomer.Widgets.Extra.FileDialog.SubWidget.RemixButton
 
 -- | The main widget creator for a file dialog. Note that
 --   you can use the same model for multiple different file
@@ -183,16 +200,16 @@ buildUI wenv model = {-makeLoader (model ^. isLoading) $-} keystroke_
   [ignoreChildrenEvts]
   $ vstack_ [childSpacing_ 3]
       [ hstack_ [childSpacing_ 3]
-         [ button "<-" DirBack
-         , button "->" DirForward
-         , button "Up" DirUp
-         , button "Ref" Refresh
+         [ leftButton  DirBack    -- button "<-" DirBack
+         , rightButton DirForward -- button "->" DirForward
+         , fileUpButton DirUp -- button "Up" DirUp
+         , refreshButton Refresh -- button "Ref" Refresh
          -- , textField_ currentDir [readOnly]
          , label (showFilePath (model ^. currentDir))
          , filler
          -- , extIcon roundSquareIcon "RoundSqaure"
          -- , icon IconPlus
-         , button "X" CancelDialog
+         , closeButton CancelDialog -- button "X" CancelDialog
          -- , imgButton crossIcon CancelDialog
          ]
       -- , label ("Error: " <> (model ^. fileError))

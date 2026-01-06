@@ -80,6 +80,8 @@ main = do
       appWindowIcon "./assets/images/icon.png",
       appTheme darkTheme,
       appFontDef "Regular" "./assets/fonts/Roboto-Regular.ttf",
+      -- appFontDef "Regular" "./assets/fonts/remixicon.ttf",
+      appFontDef "Remix" "./assets/fonts/remixicon.ttf",
       appInitEvent AppInit
       ]
     model = AppModel 0 Nothing defFileModel
