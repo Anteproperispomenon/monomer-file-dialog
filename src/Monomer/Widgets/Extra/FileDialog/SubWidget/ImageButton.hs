@@ -10,6 +10,11 @@ label
 @
 button "Increase count" AppIncrease
 @
+
+__NOTE__ : For the moment, this module does not work as expected.
+For buttons with icons, use "Monomer.Widgets.Extra.FileDialog.SubWidget.RemixButton"
+instead for now.
+
 -}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleContexts #-}

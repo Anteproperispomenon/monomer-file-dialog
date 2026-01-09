@@ -13,6 +13,12 @@ code:
 @
 appFontDef "Remix" "./assets/fonts/remixicon.ttf"
 @
+
+Also, a couple of the icons here require newer
+versions of `remixicon.ttf` than what Monomer
+provides by default. You can get a newer version
+at <https://remixicon.com/>.
+
 -}
 
 module Monomer.Widgets.Extra.FileDialog.SubWidget.RemixButton
@@ -36,6 +42,10 @@ module Monomer.Widgets.Extra.FileDialog.SubWidget.RemixButton
   , saveButton2
   , saveButton3
   , saveButton4
+  , deleteButton
+  , newFolderButton
+  , undoButton
+  , goHomeButton
   ) where
 
 
@@ -164,3 +174,17 @@ saveButton4 evt = remixButton remixSave2Line evt
 
 closeButton :: WidgetEvent e => e -> WidgetNode s e
 closeButton = remixButton remixCloseFill
+
+deleteButton :: WidgetEvent e => e -> WidgetNode s e
+deleteButton = remixButton remixDeleteBinLine
+
+newFolderButton :: WidgetEvent e => e -> WidgetNode s e
+newFolderButton = remixButton remixFolderAddLine
+
+undoButton :: WidgetEvent e => e -> WidgetNode s e
+undoButton = remixButton remixArrowGoBackLine
+
+goHomeButton :: WidgetEvent e => e -> WidgetNode s e
+goHomeButton = remixButton remixHome3Line
+
+

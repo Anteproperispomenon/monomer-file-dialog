@@ -9,6 +9,11 @@ allows user-defined drawings of icons.
 @
 icon IconPlus
 @
+
+__NOTE__ : If you want to use pre-designed icons on
+e.g. buttons, just use "Monomer.Widgets.Extra.FileDialog.SubWidget.RemixButton"
+and "Monomer.Graphics.RemixIcon" instead.
+
 -}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}

@@ -7,6 +7,9 @@ A companion module to "Monomer.Widgets.Util.Drawing"
 that provides a type that can be used to make the
 functions from that module into concrete data types.
 
+__NOTE__ : Many of the functions here (/especially/ the
+Bezier functions) have yet to be tested for correctness.
+
 -}
 
 

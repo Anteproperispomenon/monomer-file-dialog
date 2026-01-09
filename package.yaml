@@ -50,6 +50,7 @@ library:
     - Monomer.Widgets.Extra.FileDialog.Filters
     - Monomer.Widgets.Extra.FileDialog.Filters.Common
     - Monomer.Widgets.Extra.FileDialog.Helpers
+    - Monomer.Widgets.Extra.FileDialog.SubWidget.RemixButton
   ghc-options:
   - -fwarn-incomplete-patterns
   - -threaded
