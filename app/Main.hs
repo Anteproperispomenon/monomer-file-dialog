@@ -14,6 +14,9 @@ import qualified Monomer.Lens as L
 
 import Monomer.Widgets.Extra.FileDialog
 
+import Monomer.Widgets.Extra.FileDialog.Filters
+import Monomer.Widgets.Extra.FileDialog.Filters.Common
+
 import System.OsPath
 
 data AppModel = AppModel 
@@ -61,7 +64,7 @@ handleEvent
   -> AppEvent
   -> [AppEventResponse AppModel AppEvent]
 handleEvent wenv node model evt = case evt of
-  AppInit -> []
+  AppInit -> [Model (model & fileModel %~ (turnOnFilter . changeFilters [imageKind]))]
   AppIncrease -> [Model (model & clickCount +~ 1)]
   (AppSetPath pth) -> [Model (model & thatFile .~ (Just pth))]
   AppSetOpen -> [Model (model & fileModel %~ setOpen)]

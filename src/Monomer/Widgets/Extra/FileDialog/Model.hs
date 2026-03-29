@@ -26,6 +26,9 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , isLoading
   , dirCount
   , isSetup
+  , isFiltered
+  , curFilter
+  , filterList
   , DialogType(..)
   , FileDialogEvent(..)
   , goBack
@@ -34,6 +37,12 @@ module Monomer.Widgets.Extra.FileDialog.Model
   , goDir
   , setOpen
   , setSave
+  , FilterData(..)
+  , FileKind(..)
+  , FileFormat(..)
+  , changeFilters
+  , turnOnFilter
+  , turnOffFilter
   , defFileModel
   , defFileModelOpen
   , defFileModelSave
@@ -62,7 +71,14 @@ import Control.Lens.TH
 
 import Data.Default
 
-import System.OsString (osstr)
+import Monomer.Widgets.Extra.FileDialog.OsString.Internal
+
+-- import System.OsString (osstr)
+import System.OsString.Compat (osstr)
+
+import Monomer.Widgets.Extra.FileDialog.Filters.Internal
+
+import Monomer.Widgets.Extra.FileDialog.OsString.Trie
 
 data DialogType
   = Open
@@ -93,6 +109,9 @@ data FileDialogModel = FileDialogModel
   , _isLoading  :: Bool
   , _dirCount   :: Word16
   , _isSetup    :: Bool
+  , _isFiltered :: Bool
+  , _curFilter  :: FilterData
+  , _filterList :: [FilterData]
   } deriving (Show, Eq)
 
 makeLenses 'FileDialogModel
@@ -128,6 +147,9 @@ instance Default FileDialogModel where
     , _isLoading  = False
     , _dirCount   = 0
     , _isSetup    = False
+    , _isFiltered = False
+    , _curFilter  = allFiles
+    , _filterList = [allFiles]
     }
 
 -- | Change the underlying `FileDialogModel` to
@@ -168,6 +190,7 @@ data FileDialogEvent
   | ConfirmOverwrite
   | DoneFile OsPath
   | CancelDialog -- Stop Searching for a file
+  | FilterChanged ExtTrie
   | NullEvent   -- Do Nothing
   deriving (Show, Eq)
 
@@ -273,3 +296,14 @@ goDir newDir model
     oldDir = _currentDir model
     mx     = _maxBacklog model
 
+-- | Change the choices of filters for the
+--   Dialog model. Like `setOpen`, use with
+--   `(%~)` on the model.
+changeFilters :: [FileKind] -> FileDialogModel -> FileDialogModel
+changeFilters fks model = model {_filterList = (makeFilterData fks)}
+
+turnOnFilter :: FileDialogModel -> FileDialogModel
+turnOnFilter model = model {_isFiltered = True}
+
+turnOffFilter :: FileDialogModel -> FileDialogModel
+turnOffFilter model = model {_isFiltered = False}
